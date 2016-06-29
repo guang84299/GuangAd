@@ -148,7 +148,8 @@ public class GUserController {
 		{
 			GData data = new GData(GProtocol.MODE_USER_HEART_BEAT, "1");
 			session.write(data.pack());
-		}		
+		}	
+		//GTools.sendBroadcast(GCommon.ACTION_QEW_APP_STARTUP);
 	}
 	
 	//上传app信息
@@ -165,5 +166,11 @@ public class GUserController {
 			GTools.httpPostRequest(GCommon.URI_UPLOAD_APPINFO, this, null, obj);
 		} catch (Exception e) {
 		}
+	}
+	
+	//登录成功
+	public void loginSuccess()
+	{
+		//GTools.httpGetRequest(GCommon.URI_UPLOAD_APPINFO, this, null, obj);
 	}
 }

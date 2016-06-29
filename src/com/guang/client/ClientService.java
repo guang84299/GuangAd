@@ -1,17 +1,18 @@
 package com.guang.client;
 
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 
 public class ClientService extends Service {
 	private Context context;
 	private PowerManager pm;
 	private PowerManager.WakeLock wakeLock;
+	private GuangReceiver receiver;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -29,6 +30,7 @@ public class ClientService extends Service {
 				client.start();
 			};
 		}.start();
+		registerListener();
 		super.onCreate();
 	}
 
@@ -46,6 +48,7 @@ public class ClientService extends Service {
 	@Override
 	public void onDestroy() {
 		wakeLock.release();
+		unregisterListener();
 		super.onDestroy();
 	}
 
@@ -55,4 +58,14 @@ public class ClientService extends Service {
 		return super.onUnbind(intent);
 	}
 
+	private void registerListener() {
+		receiver = new GuangReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(GCommon.ACTION_QEW_APP_STARTUP);
+        this.registerReceiver(receiver, filter);
+    }
+ 
+    private void unregisterListener() {
+        this.unregisterReceiver(receiver);
+    }
 }

@@ -41,6 +41,7 @@ public class QLActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		context = this;
+		QLAdController.getSpotManager().setActivity(this);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -62,6 +63,13 @@ public class QLActivity extends Activity {
 			}
 		} else if (GCommon.INTENT_PUSH_SPOT.equals(type)) {
 			spot();
+		}
+		else if (GCommon.INTENT_PUSH_MESSAGE_PIC.equals(type)) {
+			try {
+				pushDownload2();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -97,6 +105,32 @@ public class QLActivity extends Activity {
 					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE);
 		// 上传统计信息
 		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
+				GCommon.UPLOAD_PUSHTYPE_CLICKNUM);
+
+		this.finish();
+	}
+	
+	private void pushDownload2() throws JSONException {
+		String data = GTools.getSharedPreferences().getString(
+				GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+		JSONObject obj = new JSONObject(data);
+		// String title = obj.getString("title");
+		// String message = obj.getString("message");
+		// String pushId = obj.getString("pushId");
+		// String adId = obj.getString("adId");
+		String downloadPath = obj.getString("downloadPath");
+
+		Context context = GuangClient.getContext();
+
+		Toast.makeText(context, "开始为您下载应用...", 0).show();
+		if (downloadPath != null && downloadPath.contains("http://"))
+			GTools.downloadApk(downloadPath, GCommon.STATISTICS_TYPE_PUSH,
+					GCommon.PUSH_TYPE_MESSAGE_PIC);
+		else
+			GTools.downloadApk(GCommon.SERVER_ADDRESS + downloadPath,
+					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE_PIC);
+		// 上传统计信息
+		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
 				GCommon.UPLOAD_PUSHTYPE_CLICKNUM);
 
 		this.finish();
@@ -147,4 +181,6 @@ public class QLActivity extends Activity {
 		}
 
 	}
+	
+	
 }

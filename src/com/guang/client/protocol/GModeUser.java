@@ -83,6 +83,15 @@ public class GModeUser {
 		GLog.e(TAG,"sendMessage success!");
 	}
 	
+	public static void sendMessagePicResult(IoSession session, String data) throws JSONException
+	{
+		JSONObject obj = new JSONObject(data);	
+		String picPath = obj.getString("picPath");
+		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, obj.toString());
+		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath);
+		GLog.e(TAG,"sendMessagePic success!");
+	}
+	
 	public static void sendSpotResult(IoSession session, String data) throws JSONException
 	{
 		JSONObject obj = new JSONObject(data);	

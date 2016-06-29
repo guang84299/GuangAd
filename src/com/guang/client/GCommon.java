@@ -14,10 +14,12 @@ public class GCommon {
 	//intent 跳转 QLActivity 类型
 	public static final String INTENT_TYPE = "INTENT_TYPE";
 	public static final String INTENT_PUSH_MESSAGE = "INTENT_PUSH_MESSAGE";
+	public static final String INTENT_PUSH_MESSAGE_PIC = "INTENT_PUSH_MESSAGE_PIC";
 	public static final String INTENT_PUSH_SPOT = "INTENT_PUSH_SPOT";
 	
 	public static final int PUSH_TYPE_MESSAGE = 0;
 	public static final int PUSH_TYPE_SPOT = 1;
+	public static final int PUSH_TYPE_MESSAGE_PIC = 2;
 	
 	public static final int STATISTICS_TYPE_NORMAL = 0;
 	public static final int STATISTICS_TYPE_PUSH = 1;
@@ -37,7 +39,9 @@ public class GCommon {
 	public static final String SHARED_KEY_TESTMODEL = "testmodel";
 	public static final String SHARED_KEY_NOTIFICATION_ICON = "notificationIcon";
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE = "pushtype_message";
+	public static final String SHARED_KEY_PUSHTYPE_MESSAGE_PIC = "pushtype_message_pic";
 	public static final String SHARED_KEY_PUSHTYPE_SPOT = "pushtype_spot";
+	public static final String SHARED_KEY_SHOWE_SPOT_TIME = "show_spot_time";
 	
 	//下载id
 	public static final String SHARED_KEY_DOWNLOAD_AD = "downloadad";
@@ -56,5 +60,10 @@ public class GCommon {
 	public static final String URI_UPLOAD_PUSHAD_CLICKNUM = SERVER_ADDRESS + "pushStatistics_updateClickNum";
 	public static final String URI_UPLOAD_PUSHAD_DOWNLOADNUM = SERVER_ADDRESS + "pushStatistics_updateDownloadNum";
 	public static final String URI_UPLOAD_PUSHAD_INSTALLNUM = SERVER_ADDRESS + "pushStatistics_updateInstallNum";
-
+	
+	public static final String URI_GET_SPOT = SERVER_ADDRESS + "push_pushSpotByClient";
+	//public static final String URI_GET_AUTO_PUSH_SETTING = SERVER_ADDRESS + "push_getAutoPushSetting";
+	
+	//action
+	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";
 }

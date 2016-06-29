@@ -4,10 +4,13 @@ package com.qinglu.ad.impl.qinglu;
 
 
 
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.widget.RelativeLayout;
 
 import com.guang.client.GCommon;
@@ -20,6 +23,7 @@ import com.qinglu.ad.listener.QLSpotDialogListener;
 
 public class QLSpotManagerQingLu implements QLSpotManager{
 	private Context context;
+	private Activity activity;
 	private int animationType;
 	
 	public void updateContext(Context context)
@@ -65,13 +69,23 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	
 	@SuppressLint("NewApi")
 	@Override
-	public void showSpotAdById(String id) {
-		//QLNetTools.httpRequestSpotAdById(context, id);	
-		
+	public void showSpotAd() {	
+		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("username", name);
+		} catch (Exception e) {
+		}
+		GTools.httpPostRequest(GCommon.URI_GET_SPOT, null, null, data);
 	}
 
 	public void showSpotAd(Object obj,Object rev)
 	{
+		if(this.activity != null)
+		{
+			this.activity.finish();
+			this.activity = null;
+		}
 		Intent intent = new Intent(this.context, QLActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT);
@@ -110,6 +124,11 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	@Override
 	public int getAnimationType() {
 		return this.animationType;
+	}
+
+	@Override
+	public void setActivity(Activity activity) {
+		this.activity = activity;
 	}
 	
 

@@ -2,9 +2,12 @@ package com.qinglu.ad;
 
 import com.qinglu.ad.listener.QLSpotDialogListener;
 
+import android.app.Activity;
 import android.content.Context;
 
 public interface QLSpotManager {
+	//设置activity
+	void setActivity(Activity activity);
 	//更新context
 	void updateContext(Context context);
 	//预加载插屏广告数据
@@ -17,7 +20,7 @@ public interface QLSpotManager {
 	//展示插屏广告
 	 void showSpotAds(Context con);
 	 void showSpotAds(Context con,QLSpotDialogListener spotDialogListener);
-	 void showSpotAdById(String id);
+	 void showSpotAd();
 	 void showSpotAd(Object obj,Object rev);
 	 //开屏加载
 	 void loadSplashSpotAds();

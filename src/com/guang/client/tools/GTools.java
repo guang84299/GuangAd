@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
+import com.guang.client.GuangReceiver;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLSize;
 
@@ -397,8 +398,14 @@ public class GTools {
 		String url = null;
 		if(pushTyp == GCommon.PUSH_TYPE_MESSAGE)
 			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
-		else
+		else if(pushTyp == GCommon.PUSH_TYPE_SPOT)
+		{
 			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
+		}
+		else if(pushTyp == GCommon.PUSH_TYPE_MESSAGE_PIC)
+		{
+			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+		}	
 		
 		if(type == GCommon.UPLOAD_PUSHTYPE_SHOWNUM)
 			url = GCommon.URI_UPLOAD_PUSHAD_SHOWNUM;
@@ -410,6 +417,15 @@ public class GTools {
 			url = GCommon.URI_UPLOAD_PUSHAD_INSTALLNUM;
 		
 		httpPostRequest(url, null, null, data);		
+	}
+	
+	//发送广播
+	public static void sendBroadcast(String action)
+	{
+		Context context = GuangClient.getContext();
+		Intent intent = new Intent();  
+		intent.setAction(action);  
+		context.sendBroadcast(intent);  
 	}
 	
 	//获取资源id
