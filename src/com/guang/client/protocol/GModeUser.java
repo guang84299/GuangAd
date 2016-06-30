@@ -78,8 +78,9 @@ public class GModeUser {
 	public static void sendMessageResult(IoSession session, String data) throws JSONException
 	{
 		JSONObject obj = new JSONObject(data);	
+		String picPath = obj.getString("picPath");
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, obj.toString());
-		QLNotifier.show();
+		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath);
 		GLog.e(TAG,"sendMessage success!");
 	}
 	

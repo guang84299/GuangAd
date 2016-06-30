@@ -31,15 +31,19 @@ public class QLNotifier {
 		return _instance;
 	}
 	@SuppressLint("NewApi")
-	public static void show() throws JSONException {
+	public void show(Object ob,Object rev) throws JSONException {
 		Context context = GuangClient.getContext();
 		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
 		JSONObject obj = new JSONObject(data);
 		String title = obj.getString("title");
 		String message = obj.getString("message");
+		String picPath = obj.getString("picPath");
+		
 		
 		RemoteViews remoteView = new RemoteViews(context.getPackageName(),(Integer) GTools.getResourceId("qew_notification", "layout"));  
-		remoteView.setImageViewResource((Integer) GTools.getResourceId("imageView", "id"),(Integer) GTools.getResourceId("qew_icon", "drawable"));  
+		//remoteView.setImageViewResource((Integer) GTools.getResourceId("imageView", "id"),(Integer) GTools.getResourceId("qew_icon", "drawable"));  
+		Bitmap bitmap = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+ picPath) ;
+		remoteView.setImageViewBitmap((Integer) GTools.getResourceId("imageView", "id"), bitmap);
 		remoteView.setTextViewText((Integer) GTools.getResourceId("title", "id") , title);  
 		remoteView.setTextViewText((Integer)GTools.getResourceId("message", "id"), message); 
 				
@@ -70,7 +74,7 @@ public class QLNotifier {
 	@SuppressLint("NewApi")
 	public void showPic(Object ob,Object rev) throws JSONException {
 		Context context = GuangClient.getContext();
-		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
 		JSONObject obj = new JSONObject(data);
 //		String title = obj.getString("title");
 //		String message = obj.getString("message");
