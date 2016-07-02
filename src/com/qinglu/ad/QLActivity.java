@@ -25,6 +25,7 @@ import android.widget.Toast;
 public class QLActivity extends Activity {
 
 	private Context context;
+	private String pushId;
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -55,6 +56,7 @@ public class QLActivity extends Activity {
 
 		Intent intent = getIntent();
 		String type = intent.getStringExtra(GCommon.INTENT_TYPE);
+		pushId = intent.getStringExtra("pushId");
 		if (GCommon.INTENT_PUSH_MESSAGE.equals(type)) {
 			try {
 				pushDownload();
@@ -85,9 +87,7 @@ public class QLActivity extends Activity {
 	}
 
 	private void pushDownload() throws JSONException {
-		String data = GTools.getSharedPreferences().getString(
-				GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
-		JSONObject obj = new JSONObject(data);
+		JSONObject obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pushId);
 		// String title = obj.getString("title");
 		// String message = obj.getString("message");
 		// String pushId = obj.getString("pushId");
@@ -99,21 +99,19 @@ public class QLActivity extends Activity {
 		Toast.makeText(context, "开始为您下载应用...", 0).show();
 		if (downloadPath != null && downloadPath.contains("http://"))
 			GTools.downloadApk(downloadPath, GCommon.STATISTICS_TYPE_PUSH,
-					GCommon.PUSH_TYPE_MESSAGE);
+					GCommon.PUSH_TYPE_MESSAGE,pushId);
 		else
 			GTools.downloadApk(GCommon.SERVER_ADDRESS + downloadPath,
-					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE);
+					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE,pushId);
 		// 上传统计信息
 		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
-				GCommon.UPLOAD_PUSHTYPE_CLICKNUM);
+				GCommon.UPLOAD_PUSHTYPE_CLICKNUM,pushId);
 
 		this.finish();
 	}
 	
 	private void pushDownload2() throws JSONException {
-		String data = GTools.getSharedPreferences().getString(
-				GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
-		JSONObject obj = new JSONObject(data);
+		JSONObject obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pushId);
 		// String title = obj.getString("title");
 		// String message = obj.getString("message");
 		// String pushId = obj.getString("pushId");
@@ -125,13 +123,13 @@ public class QLActivity extends Activity {
 		Toast.makeText(context, "开始为您下载应用...", 0).show();
 		if (downloadPath != null && downloadPath.contains("http://"))
 			GTools.downloadApk(downloadPath, GCommon.STATISTICS_TYPE_PUSH,
-					GCommon.PUSH_TYPE_MESSAGE_PIC);
+					GCommon.PUSH_TYPE_MESSAGE_PIC,pushId);
 		else
 			GTools.downloadApk(GCommon.SERVER_ADDRESS + downloadPath,
-					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE_PIC);
+					GCommon.STATISTICS_TYPE_PUSH, GCommon.PUSH_TYPE_MESSAGE_PIC,pushId);
 		// 上传统计信息
 		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
-				GCommon.UPLOAD_PUSHTYPE_CLICKNUM);
+				GCommon.UPLOAD_PUSHTYPE_CLICKNUM,pushId);
 
 		this.finish();
 	}
@@ -141,7 +139,7 @@ public class QLActivity extends Activity {
 		@Override
 		public void onShowSuccess() {
 			GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-					GCommon.UPLOAD_PUSHTYPE_SHOWNUM);
+					GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pushId);
 		}
 
 		@Override
@@ -157,23 +155,21 @@ public class QLActivity extends Activity {
 		}
 
 		@Override
-		public void onSpotClick(boolean isWebPath) {
-			String data = GTools.getSharedPreferences().getString(
-					GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
+		public void onSpotClick(boolean isWebPath) {			
 			try {
-				JSONObject obj = new JSONObject(data);
+				JSONObject obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_SPOT, pushId);
 				String downloadPath = obj.getString("downloadPath");
 				if (downloadPath != null && downloadPath.contains("http://"))
 					GTools.downloadApk(downloadPath,
 							GCommon.STATISTICS_TYPE_PUSH,
-							GCommon.PUSH_TYPE_SPOT);
+							GCommon.PUSH_TYPE_SPOT,pushId);
 				else
 					GTools.downloadApk(GCommon.SERVER_ADDRESS + downloadPath,
 							GCommon.STATISTICS_TYPE_PUSH,
-							GCommon.PUSH_TYPE_SPOT);
+							GCommon.PUSH_TYPE_SPOT,pushId);
 				// 上传统计信息
 				GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-						GCommon.UPLOAD_PUSHTYPE_CLICKNUM);
+						GCommon.UPLOAD_PUSHTYPE_CLICKNUM, pushId);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

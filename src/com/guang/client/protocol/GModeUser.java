@@ -2,9 +2,10 @@ package com.guang.client.protocol;
 
 
 import org.apache.mina.core.session.IoSession;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import com.guang.client.GCommon;
 import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GLog;
@@ -15,6 +16,7 @@ import com.qinglu.ad.QLNotifier;
 
 
 
+@SuppressLint("NewApi")
 public class GModeUser {
 	public static final String TAG = "GModeUser";
 	
@@ -75,29 +77,122 @@ public class GModeUser {
 		}
 	}
 	
-	public static void sendMessageResult(IoSession session, String data) throws JSONException
+	public static void sendMessageResult(IoSession session, String data) 
 	{
-		JSONObject obj = new JSONObject(data);	
-		String picPath = obj.getString("picPath");
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, obj.toString());
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath);
+		JSONObject obj = null;
+		String picPath = null;
+		int order = 0;
+		String adId = null;
+		try {
+			 obj = new JSONObject(data);	
+			 picPath = obj.getString("picPath");
+			 order = obj.getInt("order");
+			 adId = obj.getString("adId");
+		} catch (Exception e) {
+		}		
+		
+		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
+		JSONArray arr = null;
+		if(s == null || "".equals(s))
+			arr = new JSONArray();
+		else
+		{
+			try {
+				arr = new JSONArray(s);
+			} catch (JSONException e) {
+				arr = new JSONArray();
+			}
+		}
+			
+		arr.put(obj);
+
+		while(arr.length() > 20)
+		{
+			arr.remove(0);
+		}
+		
+		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, arr.toString());
+		if(order == 0)
+		{
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath);
+		}	
+		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendMessage success!");
 	}
 	
-	public static void sendMessagePicResult(IoSession session, String data) throws JSONException
+	public static void sendMessagePicResult(IoSession session, String data)
 	{
-		JSONObject obj = new JSONObject(data);	
-		String picPath = obj.getString("picPath");
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, obj.toString());
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath);
+		JSONObject obj = null;
+		String picPath = null;
+		int order = 0;
+		String adId = null;
+		try {
+			 obj = new JSONObject(data);	
+			 picPath = obj.getString("picPath");
+			 order = obj.getInt("order");
+			 adId = obj.getString("adId");
+		} catch (Exception e) {
+		}		
+		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+		JSONArray arr = null;
+		if(s == null || "".equals(s))
+			arr = new JSONArray();
+		else
+		{
+			try {
+				arr = new JSONArray(s);
+			} catch (JSONException e) {
+				arr = new JSONArray();
+			}
+		}
+			
+		arr.put(obj);
+
+		while(arr.length() > 20)
+		{
+			arr.remove(0);
+		}
+		
+		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, arr.toString());		
+		if(order == 0)
+		{
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath);
+		}
+		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendMessagePic success!");
+		
 	}
 	
-	public static void sendSpotResult(IoSession session, String data) throws JSONException
+	public static void sendSpotResult(IoSession session, String data)
 	{
-		JSONObject obj = new JSONObject(data);	
-		String picPath = obj.getString("picPath");
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, obj.toString());
+		JSONObject obj = null;
+		String picPath = null;
+		try {
+			 obj = new JSONObject(data);	
+			 picPath = obj.getString("picPath");
+		} catch (Exception e) {
+		}		
+		
+		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
+		JSONArray arr = null;
+		if(s == null || "".equals(s))
+			arr = new JSONArray();
+		else
+		{
+			try {
+				arr = new JSONArray(s);
+			} catch (JSONException e) {
+				arr = new JSONArray();
+			}
+		}
+		arr.put(obj);
+
+		while(arr.length() > 10)
+		{
+			arr.remove(0);
+		}
+
+		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, arr.toString());
 		
 		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath);
 		GLog.e(TAG,"sendSpot success!");

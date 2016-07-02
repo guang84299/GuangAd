@@ -85,7 +85,8 @@ public class QLSpotView extends RelativeLayout{
 			}
 			else
 			{
-				obj = new JSONObject(mySharedPreferences.getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, ""));
+				obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1);	
+				//obj = new JSONObject(mySharedPreferences.getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, ""));
 			}
 			getSpotView(context,animationType,obj);
 		} catch (JSONException e) {

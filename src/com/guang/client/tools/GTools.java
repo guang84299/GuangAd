@@ -22,6 +22,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.guang.client.GCommon;
@@ -49,6 +51,7 @@ import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 import android.view.WindowManager;
 
+@SuppressLint("NewApi")
 public class GTools {
 
 	private static final String TAG = "GTools";
@@ -181,11 +184,58 @@ public class GTools {
 	}
 	
 	// 安装一个应用
-	public static void install(Context context, String apkUrl) {
+	public static void install(Context context, String apkUrl,String pushId) {		
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setDataAndType(Uri.fromFile(new File(apkUrl)),
 				"application/vnd.android.package-archive");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		
+		String key = GCommon.SHARED_KEY_PUSHTYPE_MESSAGE;
+		int pushType = GCommon.PUSH_TYPE_MESSAGE;
+		JSONObject obj = getPushShareDataByPushId(key, pushId);
+		if(obj == null)
+		{		
+			key = GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC;
+			pushType = GCommon.PUSH_TYPE_MESSAGE_PIC;
+			obj = getPushShareDataByPushId(key, pushId);	
+			if(obj == null)
+			{		
+				key = GCommon.SHARED_KEY_PUSHTYPE_SPOT;
+				pushType = GCommon.PUSH_TYPE_SPOT;
+				obj = getPushShareDataByPushId(key, pushId);	
+				if(obj == null)
+				{
+					return;
+				}			
+			}			
+		}		
+		String s = getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_AD, "");
+		JSONArray arr = null;
+		if(s == null || "".equals(s))
+			arr = new JSONArray();
+		else
+		{
+			try {
+				arr = new JSONArray(s);
+			} catch (JSONException e) {
+				arr = new JSONArray();
+			}
+		}
+		JSONObject obj2 = new JSONObject();
+		try {
+			obj2.put("pushId", pushId);
+			obj2.put("packageName", obj.getString("packageName"));
+			obj2.put("pushType", pushType);
+		} catch (Exception e) {
+		}
+		arr.put(obj2);
+
+		while(arr.length() > 10)
+		{
+			arr.remove(0);
+		}
+		
+		saveSharedData(GCommon.SHARED_KEY_INSTALL_AD, arr.toString());
 		context.startActivity(intent);
 	}
 	
@@ -363,7 +413,7 @@ public class GTools {
 	
 	// 下载apk文件 type: 1:广告统计 2:推送统计  adType: 1:push messqge 2:push spot
 	@SuppressLint("NewApi")
-	public static void downloadApk(String fileUri,int statisticsType, int pushType) {
+	public static void downloadApk(String fileUri,int statisticsType, int pushType,String pushId) {
 		final Context context = GuangClient.getContext();
 		
 		DownloadManager downloadManager = (DownloadManager) context
@@ -385,26 +435,48 @@ public class GTools {
 			obj.put("statisticsType", statisticsType);
 			obj.put("pushType", pushType);
 			obj.put("name", name);
-			saveSharedData(GCommon.SHARED_KEY_DOWNLOAD_AD, obj.toString());
+			obj.put("pushId", pushId);
+			
+			String key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE;
+			if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
+				key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC;
+			else if(pushType == GCommon.PUSH_TYPE_SPOT)
+				key = GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT;
+			
+			String s = GTools.getSharedPreferences().getString(key, "");
+			JSONArray arr = null;
+			if(s == null || "".equals(s))
+				arr = new JSONArray();
+			else
+				arr = new JSONArray(s);
+			arr.put(obj);
+
+			while(arr.length() > 10)
+			{
+				arr.remove(0);
+			}
+			
+			
+			saveSharedData(key, arr.toString());
 		} catch (Exception e) {
 			GLog.e(TAG,"downloadApk 保存广告信息错误");
 		}
 	}
 
 	// 上传push统计信息 type 上传类型 1:展示 2：点击 3:下载 4：安装 
-	public static void uploadPushStatistics(int pushTyp ,final int type)
+	public static void uploadPushStatistics(int pushTyp ,final int type,String pushId)
 	{
 		String data = null;
 		String url = null;
 		if(pushTyp == GCommon.PUSH_TYPE_MESSAGE)
-			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
+			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pushId).toString();
 		else if(pushTyp == GCommon.PUSH_TYPE_SPOT)
 		{
-			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
+			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_SPOT, pushId).toString();
 		}
 		else if(pushTyp == GCommon.PUSH_TYPE_MESSAGE_PIC)
 		{
-			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pushId).toString();
 		}	
 		
 		if(type == GCommon.UPLOAD_PUSHTYPE_SHOWNUM)
@@ -463,5 +535,106 @@ public class GTools {
 	//获取styleable的ID号数组
 	public static int[] getStyleableArray(String name) {
 		return (int[])getResourceId(name,"styleable");
+	}
+	
+	//根据推送类型获得数据 index -1 得到最后一个
+	public static JSONObject getPushShareData(String key,int index)
+	{
+		String data = GTools.getSharedPreferences().getString(key, "");
+		if(data == null || "".equals(data))
+			return null;
+		try {
+			JSONArray arr = new JSONArray(data);
+			if(index == -1)
+			{
+				if(key == GCommon.SHARED_KEY_PUSHTYPE_SPOT)
+					return arr.getJSONObject(arr.length()-1);
+				for(int i = arr.length()-1;i >= 0;i--)
+				{
+					JSONObject obj = arr.getJSONObject(i);
+					if(obj.getInt("order") == 0)
+						return obj;
+				}
+			}
+			else
+				return arr.getJSONObject(index);
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	//根据pushId 获得数据
+	public static JSONObject getPushShareDataByPushId(String key,String pushId)
+	{
+		String data = GTools.getSharedPreferences().getString(key, "");
+		if(data == null || "".equals(data))
+			return null;
+		try {
+			JSONArray arr = new JSONArray(data);
+			for(int i=0;i<arr.length();i++)
+			{
+				JSONObject obj = arr.getJSONObject(i);
+				if(obj.getString("pushId").equals(pushId))
+					return obj;
+			}
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
+	//根据下载id 获得数据
+	public static JSONObject getDownloadShareDataById(String key,long  id)
+	{
+		String data = GTools.getSharedPreferences().getString(key, "");
+		if(data == null || "".equals(data))
+			return null;
+		try {
+			JSONArray arr = new JSONArray(data);
+			for(int i=0;i<arr.length();i++)
+			{
+				JSONObject obj = arr.getJSONObject(i);
+				if(obj.getLong("id") == id)
+					return obj;
+			}
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
+	//根据pushId 获得数据
+	public static JSONObject getDownloadShareDataByPushId(String key,String pushId)
+	{
+		String data = GTools.getSharedPreferences().getString(key, "");
+		if(data == null || "".equals(data))
+			return null;
+		try {
+			JSONArray arr = new JSONArray(data);
+			for(int i=0;i<arr.length();i++)
+			{
+				JSONObject obj = arr.getJSONObject(i);
+				if(obj.getString("pushId").equals(pushId))
+					return obj;
+			}
+		} catch (Exception e) {
+		}
+		return null;
+	}
+	
+	//根据pushId 获得数据
+	public static JSONObject getInstallShareData(String packageName)
+	{
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_AD, "");
+		if(data == null || "".equals(data))
+			return null;
+		try {
+			JSONArray arr = new JSONArray(data);
+			for(int i = arr.length()-1;i >= 0;i--)
+			{
+				JSONObject obj = arr.getJSONObject(i);
+				if(obj.getString("packageName").equals(packageName))
+					return obj;
+			}
+		} catch (Exception e) {
+		}
+		return null;
 	}
 }

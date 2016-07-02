@@ -4,6 +4,7 @@ package com.qinglu.ad.impl.qinglu;
 
 
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
@@ -86,9 +87,16 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 			this.activity.finish();
 			this.activity = null;
 		}
+		String pushId = "";
+		try {
+			pushId = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1).getString("pushId");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		Intent intent = new Intent(this.context, QLActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT);
+		intent.putExtra("pushId", pushId);
 		this.context.startActivity(intent);
 	}
 	

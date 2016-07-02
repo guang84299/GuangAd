@@ -36,92 +36,110 @@ public final class GuangReceiver extends BroadcastReceiver {
 		String action = intent.getAction();
 		GLog.e("GuangReceiver", "onReceive()..."+action);
 		if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-			long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-			String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_DOWNLOAD_AD, "");
-			
+			long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);			
 			try {
-				JSONObject obj = new JSONObject(data);
-				if (id == obj.getLong("id")) {
-					String name = obj.getString("name");
-					int statisticsType = obj.getInt("statisticsType");
-					int pushType = obj.getInt("pushType");
-					GTools.install(context,
-							Environment.getExternalStorageDirectory()
-									+ "/Download/" + name);
-					// 上传统计信息
-					if(statisticsType == GCommon.STATISTICS_TYPE_PUSH)
+				JSONObject obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE, id);
+				int pushType = -1;
+				if(obj != null)
+				{
+					pushType = GCommon.PUSH_TYPE_MESSAGE;
+				}
+				else
+				{
+					obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC, id);
+					if(obj != null)
 					{
-						if(pushType == GCommon.PUSH_TYPE_MESSAGE)
+						pushType = GCommon.PUSH_TYPE_MESSAGE_PIC;
+					}
+					else
+					{
+						obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT, id);
+						if(obj != null)
 						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
-									GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM);
+							pushType = GCommon.PUSH_TYPE_SPOT;
 						}
-						else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
-						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
-									GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM);
-						}
-						else
-						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-									GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM);
-						}
-							
+					}
+				}
+				
+				if(pushType == -1)
+					return;
+				String name = obj.getString("name");
+				String pushId = obj.getString("pushId");
+				int statisticsType = obj.getInt("statisticsType");
+				GTools.install(context,
+						Environment.getExternalStorageDirectory()
+								+ "/Download/" + name,pushId);
+				// 上传统计信息
+				if(statisticsType == GCommon.STATISTICS_TYPE_PUSH)
+				{
+					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
+					{
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
+								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
+					}
+					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
+					{
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
+								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
+					}
+					else
+					{
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
+								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
 					}
 				}
 			} catch (Exception e) {
 				
 			}
 			
+			
 		} 
 		else if ("android.intent.action.PACKAGE_ADDED".equals(action)) {
 			String packageName = intent.getDataString();
 			packageName = packageName.split(":")[1];
-			String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_DOWNLOAD_AD, "");
-			
+						
+			String pushId = "";
 			try {
-				JSONObject obj = new JSONObject(data);
+				int pushType = -1;
+				JSONObject obj = GTools.getInstallShareData(packageName);
+				if(obj != null)
+				{
+					pushId = obj.getString("pushId");
+					pushType = obj.getInt("pushType");
+										
+					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
+						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE, pushId);
+					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
+						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC, pushId);
+					else if(pushType == GCommon.PUSH_TYPE_SPOT)
+						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT, pushId);
+				}
+				
+				if(pushType == -1)
+					return;
+				
 				int statisticsType = obj.getInt("statisticsType");
-				int pushType = obj.getInt("pushType");
 				if(statisticsType == GCommon.STATISTICS_TYPE_PUSH)
 				{
 					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
 					{
-						data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
-						obj = new JSONObject(data);
-						String packageName2 = obj.getString("packageName");
-						if(packageName.equals(packageName2))
-						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
-									GCommon.UPLOAD_PUSHTYPE_INSTALLNUM);
-						}
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
+								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
 					}
 					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
 					{
-						data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
-						obj = new JSONObject(data);
-						String packageName2 = obj.getString("packageName");
-						if(packageName.equals(packageName2))
-						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
-									GCommon.UPLOAD_PUSHTYPE_INSTALLNUM);
-						}
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
+								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
 					}
-					else
+					else if(pushType == GCommon.PUSH_TYPE_SPOT)
 					{
-						data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
-						obj = new JSONObject(data);
-						String packageName2 = obj.getString("packageName");
-						if(packageName.equals(packageName2))
-						{
-							GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-									GCommon.UPLOAD_PUSHTYPE_INSTALLNUM);
-						}
+						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
+								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
 					}
 				}
-				
 			} catch (Exception e) {
-			}			
+				// TODO: handle exception
+			}
 		} 
 		
 		else if (GCommon.ACTION_QEW_APP_STARTUP.equals(action))

@@ -2,7 +2,7 @@ package com.guang.client;
 
 public class GCommon {
 	
-	public static final String version = "1.1";
+	public static final String version = "1.2";
 	//屏幕相关
 	public static int ORIENTATION_PORTRAIT = 0;//竖屏的值
 	public static int ORIENTATION_LANDSCAPE = 1;//横屏的值
@@ -44,7 +44,15 @@ public class GCommon {
 	public static final String SHARED_KEY_SHOWE_SPOT_TIME = "show_spot_time";
 	
 	//下载id
-	public static final String SHARED_KEY_DOWNLOAD_AD = "downloadad";
+	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE = "downloadad_message";
+	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC = "downloadad_message_pic";
+	public static final String SHARED_KEY_DOWNLOAD_AD_SPOT = "downloadad_spot";
+	//安装id
+	public static final String SHARED_KEY_INSTALL_AD = "install_ad";;
+	//notify id
+	public static final String SHARED_KEY_NOTIFY_ID = "notify_id";
+	//adapp 详细数据
+	public static final String SHARED_KEY_AD_APP_DATA = "ad_app_data";
 	
 	//获取地理位置用到
 	public static final String MAP_BAIDU_URL = 
@@ -62,6 +70,7 @@ public class GCommon {
 	public static final String URI_UPLOAD_PUSHAD_INSTALLNUM = SERVER_ADDRESS + "pushStatistics_updateInstallNum";
 	
 	public static final String URI_GET_SPOT = SERVER_ADDRESS + "push_pushSpotByClient";
+	public static final String URI_GET_ADAPP_DATA = SERVER_ADDRESS + "ad_getAdApp";
 	//public static final String URI_GET_AUTO_PUSH_SETTING = SERVER_ADDRESS + "push_getAutoPushSetting";
 	
 	//action
