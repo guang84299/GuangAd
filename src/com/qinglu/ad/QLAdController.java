@@ -42,11 +42,10 @@ public class QLAdController {
 		return spotManager;
 	}
 		
-	public void init(Context context,int notificationIcon,boolean isTestModel)
+	public void init(Context context,boolean isTestModel)
 	{
 		this.context = context;
 		
-		GTools.saveSharedData(GCommon.SHARED_KEY_NOTIFICATION_ICON, notificationIcon);
 		GTools.saveSharedData(GCommon.SHARED_KEY_TESTMODEL,isTestModel);
 		
 		startService();

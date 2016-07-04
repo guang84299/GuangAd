@@ -37,7 +37,6 @@ public class GCommon {
 	public static final String SHARED_KEY_NAME = "name";
 	public static final String SHARED_KEY_PASSWORD = "password";
 	public static final String SHARED_KEY_TESTMODEL = "testmodel";
-	public static final String SHARED_KEY_NOTIFICATION_ICON = "notificationIcon";
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE = "pushtype_message";
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE_PIC = "pushtype_message_pic";
 	public static final String SHARED_KEY_PUSHTYPE_SPOT = "pushtype_spot";
