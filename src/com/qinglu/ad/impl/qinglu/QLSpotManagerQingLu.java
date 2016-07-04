@@ -37,7 +37,7 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 		this.context = context;		
 		this.animationType = GCommon.ANIM_ADVANCE;
 		
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png");
+		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png",true);
 	}
 	@Override
 	public void loadSpotAds() {

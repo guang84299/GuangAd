@@ -350,7 +350,7 @@ public class GTools {
 	
 	// 下载资源 url 请求路径
 	public static void downloadRes(final String url,
-			final Object target, final String callback, final Object data)
+			final Object target, final String callback, final Object data,final boolean isDelete)
 	{
 		final Context context = GuangClient.getContext();
 		new Thread(new Runnable() {
@@ -366,7 +366,10 @@ public class GTools {
 				String picRelPath = context.getFilesDir().getPath() + "/" + pic;
 				File file = new File(picRelPath);
 				if (file.exists()) {
-					file.delete();
+					if(isDelete)
+						file.delete();
+					else
+						return;
 				}
 				// 如果不存在判断文件夹是否存在，不存在则创建
 				File destDir = new File(context.getFilesDir().getPath() + "/"

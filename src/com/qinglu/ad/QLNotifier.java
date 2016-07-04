@@ -163,19 +163,19 @@ public class QLNotifier {
 			arr.remove(0);
 		}
 		if(icon_path != null && !"".equals(icon_path))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, icon_path);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, icon_path,false);
 		if(pic_path_1 != null && !"".equals(pic_path_1))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_1);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_1,false);
 		if(pic_path_2 != null && !"".equals(pic_path_2))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_2);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_2,false);
 		if(pic_path_3 != null && !"".equals(pic_path_3))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_3);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_3,false);
 		if(pic_path_4 != null && !"".equals(pic_path_4))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_4);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_4,false);
 		if(pic_path_5 != null && !"".equals(pic_path_5))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_5);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_5,false);
 		if(pic_path_6 != null && !"".equals(pic_path_6))
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_6);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_6,false);
 		
 		GTools.saveSharedData(GCommon.SHARED_KEY_AD_APP_DATA, arr.toString());
 	}

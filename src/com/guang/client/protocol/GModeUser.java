@@ -114,7 +114,7 @@ public class GModeUser {
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, arr.toString());
 		if(order == 0)
 		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath,true);
 		}	
 		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendMessage success!");
@@ -156,7 +156,7 @@ public class GModeUser {
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, arr.toString());		
 		if(order == 0)
 		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath,false);
 		}
 		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendMessagePic success!");
@@ -194,7 +194,7 @@ public class GModeUser {
 
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, arr.toString());
 		
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath);
+		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath,false);
 		GLog.e(TAG,"sendSpot success!");
 	}
 	
