@@ -11,6 +11,7 @@ import com.guang.client.GCommon;
 import com.guang.client.mode.GUser;
 import com.guang.client.protocol.GData;
 import com.guang.client.protocol.GProtocol;
+import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 
 public class GUserController {
@@ -171,6 +172,9 @@ public class GUserController {
 	//登录成功
 	public void loginSuccess()
 	{
-		//GTools.httpGetRequest(GCommon.URI_UPLOAD_APPINFO, this, null, obj);
+		GUserController.isLogin = true;
+		
+		//注册成功上传app信息
+		GUserController.getInstance().uploadAppInfos();
 	}
 }

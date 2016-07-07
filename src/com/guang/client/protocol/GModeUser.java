@@ -29,12 +29,10 @@ public class GModeUser {
 //			String password = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PASSWORD, "");
 //			GTools.saveSharedData(GCommon.SHARED_KEY_NAME, name);
 //			GTools.saveSharedData(GCommon.SHARED_KEY_PASSWORD, password);
-			
-			GUserController.isLogin = true;
 			GLog.e(TAG,"validateResult success!");
 			GLog.e(TAG,"longin success!");
-			//注册成功上传app信息
-			GUserController.getInstance().uploadAppInfos();
+			
+			GUserController.getInstance().loginSuccess();
 		}
 		else
 		{
@@ -54,11 +52,10 @@ public class GModeUser {
 //		String password = tm.getDeviceId();
 //		GTools.saveSharedData(GCommon.SHARED_KEY_NAME, name);
 //		GTools.saveSharedData(GCommon.SHARED_KEY_PASSWORD, password);
-		GUserController.isLogin = true;		
 		GLog.e(TAG,"registResult success!");
 		GLog.e(TAG,"longin success!");
-		//注册成功上传app信息
-		GUserController.getInstance().uploadAppInfos();
+		//注册成功上传app信息			
+		GUserController.getInstance().loginSuccess();
 	}
 	
 	public static void loginResult(IoSession session, String data) throws JSONException
@@ -66,8 +63,8 @@ public class GModeUser {
 		JSONObject obj = new JSONObject(data);
 		if(obj.getBoolean("result"))
 		{
-			GUserController.isLogin = true;
 			GLog.e(TAG,"longin success!");
+			GUserController.getInstance().loginSuccess();
 		}
 		else
 		{
