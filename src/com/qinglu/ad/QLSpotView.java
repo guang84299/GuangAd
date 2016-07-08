@@ -122,8 +122,18 @@ public class QLSpotView extends RelativeLayout{
 			layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
 			float width = viewBm.getWidth();
 			float height = viewBm.getHeight();
-			layoutParams.width = (int) (ss.width*0.9);
-			layoutParams.height = (int) (ss.width*0.9/width*height);
+			int dir = context.getResources().getConfiguration().orientation;
+			if(dir == 1)
+			{
+				layoutParams.width = (int) (ss.width*0.9);
+				layoutParams.height = (int) (ss.width*0.9/width*height);
+			}
+			else
+			{
+				layoutParams.height = (int) (ss.height*0.8);
+				layoutParams.width = (int) (ss.height*0.8/height*width);
+				
+			}
 			this.setSize(new QLSize(layoutParams.width, layoutParams.height));
 			view.setId(1);
 			view.setScaleType(ScaleType.FIT_XY);
@@ -137,9 +147,18 @@ public class QLSpotView extends RelativeLayout{
 			closeBm = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/images/close.png");
 			close.setImageBitmap(closeBm);
 			close.setVisibility(View.GONE);
-						
-			paramsClose.width = (int) (ss.width*0.05);
-			paramsClose.height = (int) (ss.width*0.05);
+			
+			if(dir == 1)
+			{
+				paramsClose.width = (int) (ss.width*0.05);
+				paramsClose.height = (int) (ss.width*0.05);
+			}
+			else
+			{
+				paramsClose.width = (int) (ss.height*0.05);
+				paramsClose.height = (int) (ss.height*0.05);
+			}
+			
 			paramsClose.addRule(RelativeLayout.ALIGN_TOP, 1);
 			paramsClose.addRule(RelativeLayout.ALIGN_RIGHT, 1);
 			

@@ -160,7 +160,7 @@ public final class GuangReceiver extends BroadcastReceiver {
 			}
 			if(size > time)
 			{				
-				QLAdController.getSpotManager().showSpotAd();
+				QLAdController.getSpotManager().showSpotAds(null);
 			}
 		}
 	}
