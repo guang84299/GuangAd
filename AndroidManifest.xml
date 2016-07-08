@@ -10,12 +10,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:icon="@drawable/qew_icon"
+        android:label="qew" >
         <activity
             android:name="com.xugu.qewad.MainActivity"
-            android:label="@string/app_name" >
+            android:label="qew" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,6 +26,11 @@
             android:name="com.qinglu.ad.QLActivity"
             android:label="QL"
             android:theme="@android:style/Theme.Translucent" >
+        </activity>
+        
+        <activity
+            android:name="com.qinglu.ad.QLDownActivity"
+            android:label="QL" >
         </activity>
 
         <service

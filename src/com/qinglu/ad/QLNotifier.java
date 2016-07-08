@@ -51,7 +51,7 @@ public class QLNotifier {
 		remoteView.setTextViewText((Integer) GTools.getResourceId("title", "id") , title);  
 		remoteView.setTextViewText((Integer)GTools.getResourceId("message", "id"), message); 
 				
-		Intent intent = new Intent(context,QLActivity.class);
+		Intent intent = new Intent(context,QLDownActivity.class);
 		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_MESSAGE);
 		intent.putExtra("pushId", pushId);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id,
@@ -92,7 +92,7 @@ public class QLNotifier {
 		Bitmap bitmap = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+ picPath) ;
 		remoteView.setImageViewBitmap((Integer) GTools.getResourceId("imageView", "id"), bitmap);	
 		
-		Intent intent = new Intent(context,QLActivity.class);
+		Intent intent = new Intent(context,QLDownActivity.class);
 		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_MESSAGE_PIC);
 		intent.putExtra("pushId", pushId);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id,
