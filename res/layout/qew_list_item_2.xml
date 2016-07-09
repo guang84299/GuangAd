@@ -10,7 +10,6 @@
         android:layout_height="200dp"
         android:scaleType="centerInside"
         
-         android:layout_marginLeft="2dp"
-        android:src="@drawable/abc_ab_bottom_solid_dark_holo" />
+         android:layout_marginLeft="2dp" />
 
 </LinearLayout>
