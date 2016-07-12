@@ -120,9 +120,7 @@ public class QLDownActivity extends Activity {
 		//收藏
 		doCollect();
 		
-		/**
-		 * 下载
-		 */
+		/**下载**/
 		Intent intent = getIntent();
 		String pId = intent.getStringExtra(JSON_ARR_POSITION);
 		if (pId != null && !"".equals(pId))
@@ -151,8 +149,7 @@ public class QLDownActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				Log.e("分享", "textFengXiang");
-				Toast.makeText(context, "分享", Toast.LENGTH_SHORT);
+				Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
 			}
 		});
 		
@@ -161,7 +158,7 @@ public class QLDownActivity extends Activity {
 		textCollect.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-			    Intent shortcut = new Intent(  
+			/*    Intent shortcut = new Intent(  
 			    "com.android.launcher.action.INSTALL_SHORTCUT");  
 			    // 不允许重建  
 			    shortcut.putExtra("duplicate", false);  
@@ -178,7 +175,8 @@ public class QLDownActivity extends Activity {
 		        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 		        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
                 // 发送广播
-                sendBroadcast(shortcut);
+                sendBroadcast(shortcut);*/
+				Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
 		}});
 		
 		
@@ -187,7 +185,6 @@ public class QLDownActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				
 				String pushId = null;
 				try {
 					pushId = obj.getString("pushId");
