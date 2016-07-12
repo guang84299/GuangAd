@@ -46,7 +46,7 @@
             android:layout_marginBottom="6dp"
             android:layout_marginRight="80dp"
             android:text="下载量：321312"
-            android:textColor="@android:color/black"
+            android:textColor="#757575"
             android:textSize="14sp" />
 
         <TextView
@@ -78,7 +78,7 @@
             android:layout_alignBottom="@+id/imageView_app_imager"
             android:layout_alignLeft="@+id/textView_app_name"
             android:text="应用"
-            android:textColor="@android:color/black"
+            android:textColor="#757575"
             android:textSize="14sp" />
 
     </RelativeLayout>
@@ -96,12 +96,18 @@
             android:layout_width="match_parent"
             android:layout_height="360dp" >
 
-            <com.qinglu.ad.QLHorizontalListView
+            <HorizontalScrollView
                 android:id="@+id/HorizontalListView_app_image"
                 android:layout_width="match_parent"
+                android:scrollbars="none"
                 android:layout_height="200dp">
-            </com.qinglu.ad.QLHorizontalListView>
-
+            <LinearLayout   
+                android:layout_width="fill_parent"  
+                android:layout_height="200dp"  
+                android:id="@+id/ll"  
+                android:orientation="horizontal">  
+       </LinearLayout> 
+            </HorizontalScrollView>
             <View
                 android:id="@+id/view1"
                 android:layout_width="match_parent"
@@ -121,7 +127,7 @@
                 android:textColor="@android:color/black"
                 android:layout_marginTop="4dp"
                 android:drawableLeft="@drawable/qew_xtb"
-                android:text="安全" />
+                android:text="  安全" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -132,7 +138,7 @@
                 android:textColor="@android:color/black"
                 android:layout_toRightOf="@+id/textView2"
                 android:drawableLeft="@drawable/qew_xtb"
-                android:text="无广告" />
+                android:text="  无广告" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -144,7 +150,7 @@
                 android:layout_marginLeft="12dp"
                 android:layout_toRightOf="@+id/textView3"
                 android:drawableLeft="@drawable/qew_xtb"
-                android:text="官方版本" />
+                android:text="  官方版本" />
 
             <View
                 android:id="@+id/View02"
@@ -163,8 +169,8 @@
                 android:layout_below="@+id/View02"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
-                android:text="版本号："
-                android:textColor="@android:color/black" />
+                android:text="版本："
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView_version_num"
@@ -174,7 +180,7 @@
                 android:layout_alignBottom="@+id/textView5"
                 android:layout_toRightOf="@+id/textView5"
                 android:text="1.08"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -185,7 +191,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="100dp"
                 android:text="大小："
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView_app_size"
@@ -196,8 +202,8 @@
                 android:layout_alignLeft="@+id/textView6"
                 android:layout_marginLeft="40dp"
                 android:maxLength="5"
-                android:text="3.82M"
-                android:textColor="@android:color/black" />
+                android:text="3.82"
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView_app_updata"
@@ -207,7 +213,7 @@
                 android:layout_alignBottom="@+id/textView7"
                 android:layout_toRightOf="@+id/textView7"
                 android:text="2016-07-01"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView10"
@@ -217,7 +223,7 @@
                 android:layout_alignBottom="@+id/textView9"
                 android:layout_toRightOf="@+id/textView9"
                 android:text="中文"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <View
                 android:id="@+id/view4"
@@ -241,7 +247,7 @@
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text=""
-                android:textColor="#000000" />
+                android:textColor="#757575" />
 
             <View
                 android:id="@+id/view2"
@@ -306,7 +312,7 @@
                 android:layout_alignBottom="@+id/textView13"
                 android:layout_toRightOf="@+id/textView13"
                 android:text="上海续谷"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView11"
@@ -327,7 +333,7 @@
                 android:layout_above="@+id/textView_fzgs"
                 android:layout_alignLeft="@+id/textView6"
                 android:text="语言："
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView13"
@@ -337,7 +343,7 @@
                 android:layout_below="@+id/textView7"
                 android:text="开发者："
                 android:layout_marginTop="2dp"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
 
             <TextView
                 android:id="@+id/textView7"
@@ -345,9 +351,18 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/textView5"
                 android:layout_below="@+id/textView5"
-                android:text="时    间："
+                android:text="时间："
                 android:layout_marginTop="2dp"
-                android:textColor="@android:color/black" />
+                android:textColor="#757575" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/textView_app_size"
+                android:layout_toRightOf="@+id/textView_app_size"
+                  android:textColor="#757575"
+                android:text="M" />
 
         </RelativeLayout>
     </ScrollView>
@@ -368,7 +383,7 @@
 
         <TextView
             android:id="@+id/textView_fenxiang"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
@@ -380,9 +395,8 @@
             android:text="分享"
             android:textSize="12sp" />
 
-        <TextView
-            android:id="@+id/textView_shouc"
-            android:layout_width="wrap_content"
+       <com.qinglu.ad.QLImageTextButton 
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
@@ -390,9 +404,13 @@
             android:layout_marginTop="4dp"
             android:gravity="center"
             android:text="收藏"
-            android:drawableTop="@drawable/qew_collection"
+            android:textSize="12sp"
             android:textColor="@android:color/black"
-            android:textSize="12sp" />
+            android:id="@+id/textView_shouc"
+            android:drawableTop="@drawable/qew_collection"
+            
+           >
+       </com.qinglu.ad.QLImageTextButton>
 
         <Button
             android:id="@+id/button_Down"
@@ -403,6 +421,7 @@
             android:layout_marginLeft="6dp"
             android:layout_marginRight="6dp"
             android:layout_marginTop="6dp"
+            android:textColor="@android:color/white"
             android:layout_toLeftOf="@+id/textView_shouc"
             android:layout_toRightOf="@+id/textView_fenxiang"
             android:background="#29b6f6"

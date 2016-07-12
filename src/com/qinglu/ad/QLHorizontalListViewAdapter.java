@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import com.guang.client.GCommon;
 import com.guang.client.tools.GTools;
+import com.qinglu.ad.QLDownActivity;
 
 import android.content.Context;
 import android.graphics.Bitmap;

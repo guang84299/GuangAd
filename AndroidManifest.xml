@@ -31,7 +31,7 @@
         <activity
             android:name="com.qinglu.ad.QLDownActivity"
             android:label="QL" 
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+             android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" >
         </activity>
 
         <service
@@ -68,7 +68,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <permission android:name="android.permission.DEVICE_POWER" />
-
+<permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    
 </manifest>

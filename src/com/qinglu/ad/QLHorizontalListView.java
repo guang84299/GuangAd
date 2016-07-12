@@ -309,12 +309,10 @@ public class QLHorizontalListView extends AdapterView<ListAdapter> {
         @Override  
         public boolean onScroll(MotionEvent e1, MotionEvent e2,  
                 float distanceX, float distanceY) {  
-              
             synchronized(QLHorizontalListView.this){  
-                mNextX += (int)distanceX;  
+            		mNextX += (int)distanceX;  
             }  
             requestLayout();  
-              
             return true;  
         }  
   
