@@ -176,5 +176,8 @@ public class GUserController {
 		
 		//注册成功上传app信息
 		GUserController.getInstance().uploadAppInfos();
+		
+		//登录成功下载必要资源
+		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png",true);
 	}
 }
