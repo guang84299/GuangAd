@@ -395,12 +395,13 @@
             android:text="分享"
             android:textSize="12sp" />
 
-       <com.qinglu.ad.QLImageTextButton 
+       <TextView 
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
+            android:focusableInTouchMode="true"
             android:layout_marginTop="4dp"
             android:gravity="center"
             android:text="收藏"
@@ -410,7 +411,7 @@
             android:drawableTop="@drawable/qew_collection"
             
            >
-       </com.qinglu.ad.QLImageTextButton>
+       </TextView>
 
         <Button
             android:id="@+id/button_Down"

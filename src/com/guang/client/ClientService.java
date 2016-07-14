@@ -28,6 +28,9 @@ public class ClientService extends Service {
 				GuangClient client = new GuangClient();
 				client.setContext(context);
 				client.start();
+				Intent it= new Intent();
+				it.putExtra("start_activity","start");
+				context.sendBroadcast(it);
 			};
 		}.start();
 		registerListener();
@@ -42,6 +45,7 @@ public class ClientService extends Service {
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"CPUKeepRunning");
 		wakeLock.acquire();
+		
 		super.onStart(intent, startId);
 	}
 

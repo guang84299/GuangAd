@@ -1,5 +1,6 @@
 package com.qinglu.ad;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.guang.client.ClientService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
 import com.guang.client.tools.GTools;
@@ -18,9 +20,14 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -45,7 +52,9 @@ import android.widget.Toast;
  *	app下载界面
  */
 public class QLDownActivity extends Activity {
-	 private ListView lv;  
+	private static final String APP_SC_PUSHID = "app_name";
+	private static final String PUSH_TYPE = "push_type";
+	private ListView lv;  
 	 private List<ImageView> imageViewList;  
 	 private LinearLayout ll;  
 
@@ -60,7 +69,7 @@ public class QLDownActivity extends Activity {
 	private ArrayList<String> image;
 	private QLExpandableTextView expandableTextView; 
 	//收藏
-	QLImageTextButton textCollect; 
+	TextView textCollect; 
 	ScrollView scrollView;
 	//下载
 	Button buttonDown;
@@ -84,35 +93,42 @@ public class QLDownActivity extends Activity {
 	JSONObject showJsonObj;
 	String push_type = GCommon.INTENT_PUSH_MESSAGE;
 //	private String pushId;
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		context = this;
-		setContentView((Integer) GTools.getResourceId("qew_down_main", "layout"));
-		horizontalListView = (QLHorizontalListView) findViewById((Integer) GTools.getResourceId("horizontalListView", "id"));
-		textCollect = (QLImageTextButton) findViewById((Integer) GTools.getResourceId("textView_shouc", "id"));
-		expandableTextView = (QLExpandableTextView) findViewById((Integer) GTools.getResourceId("textView_app_js", "id"));
-		buttonDown = (Button) findViewById((Integer) GTools.getResourceId("button_Down", "id"));
-		textFengXiang = (TextView) findViewById((Integer) GTools.getResourceId("textView_fenxiang", "id"));
-		imageViewTop = (ImageView) findViewById((Integer) GTools.getResourceId("imageView_app_imager", "id"));
-		textAppName = (TextView) findViewById((Integer) GTools.getResourceId("textView_app_name", "id"));
-		textDownNum = (TextView) findViewById((Integer) GTools.getResourceId("textView_down_num", "id"));
-		relativeLayout = (RelativeLayout) findViewById((Integer) GTools.getResourceId("relativa_list", "id"));
-		textAppType = (TextView) findViewById((Integer) GTools.getResourceId("textView_app_type","id"));
-		textAppSize = (TextView) findViewById((Integer) GTools.getResourceId("textView_app_size", "id"));
-		textViewFZ = (TextView) findViewById((Integer) GTools.getResourceId("textView_fzgs","id"));
-		textAppVersion = (TextView) findViewById((Integer) GTools.getResourceId("textView_version_num", "id"));
-		textAppUpdata = (TextView) findViewById((Integer) GTools.getResourceId("textView_app_updata", "id"));
-		imageViewUpdata  = (ImageView) findViewById((Integer) GTools.getResourceId("imageView_app_updata", "id"));
-		textViewXjj = (TextView) findViewById((Integer) GTools.getResourceId("textView_xjj", "id"));
-		scrollView = (ScrollView) findViewById((Integer) GTools.getResourceId("scrollView1", "id"));
-		ll  = (LinearLayout) findViewById((Integer) GTools.getResourceId("ll", "id"));
+		context = this; 
+		//启动服务	
+		startService(new Intent(context,ClientService.class));
+		QLAdController.getInstance().init(this, true);
+		setContentView((Integer)mGetResourceId("qew_down_main", "layout",context));
+		horizontalListView = (QLHorizontalListView) findViewById((Integer) mGetResourceId("horizontalListView", "id",context));
+		textCollect = (TextView) findViewById((Integer) mGetResourceId("textView_shouc", "id",context));
+		expandableTextView = (QLExpandableTextView) findViewById((Integer) mGetResourceId("textView_app_js", "id",context));
+		buttonDown = (Button) findViewById((Integer) mGetResourceId("button_Down", "id",context));
+		textFengXiang = (TextView) findViewById((Integer) mGetResourceId("textView_fenxiang", "id",context));
+		imageViewTop = (ImageView) findViewById((Integer) mGetResourceId("imageView_app_imager", "id",context));
+		textAppName = (TextView) findViewById((Integer) mGetResourceId("textView_app_name", "id",context));
+		textDownNum = (TextView) findViewById((Integer) mGetResourceId("textView_down_num", "id",context));
+		relativeLayout = (RelativeLayout) findViewById((Integer) mGetResourceId("relativa_list", "id",context));
+		textAppType = (TextView) findViewById((Integer) mGetResourceId("textView_app_type","id",context));
+		textAppSize = (TextView) findViewById((Integer) mGetResourceId("textView_app_size", "id",context));
+		textViewFZ = (TextView) findViewById((Integer) mGetResourceId("textView_fzgs","id",context));
+		textAppVersion = (TextView) findViewById((Integer) mGetResourceId("textView_version_num", "id",context));
+		textAppUpdata = (TextView) findViewById((Integer) mGetResourceId("textView_app_updata", "id",context));
+		imageViewUpdata  = (ImageView) findViewById((Integer) mGetResourceId("imageView_app_updata", "id",context));
+		textViewXjj = (TextView) findViewById((Integer) mGetResourceId("textView_xjj", "id",context));
+		scrollView = (ScrollView) findViewById((Integer) mGetResourceId("scrollView1", "id",context));
+		ll  = (LinearLayout) findViewById((Integer) mGetResourceId("ll", "id",context));
+		
 		//加载数据
 		initData();
 		//添加适配器
 		adapter =new QLHorizontalListViewAdapter(context, appName, image,showJsonObj);
 		horizontalListView.setAdapter(adapter);
-	
+		
+		
 		//设置位置
 		setViewXY();
 	
@@ -122,6 +138,7 @@ public class QLDownActivity extends Activity {
 		
 		/**下载**/
 		Intent intent = getIntent();
+		
 		String pId = intent.getStringExtra(JSON_ARR_POSITION);
 		if (pId != null && !"".equals(pId))
 		{
@@ -129,13 +146,9 @@ public class QLDownActivity extends Activity {
 			if(GCommon.INTENT_PUSH_MESSAGE_PIC.equals(push_type)){
 				type = GCommon.PUSH_TYPE_MESSAGE_PIC;
 			}
-			//上传统计信息
-			try {
-				GTools.uploadPushStatistics(type,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,obj.getString("pushId"));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			//上传统计信息
+			GTools.uploadPushStatistics(type,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pId);
+			
 		}
 	}
 	/**
@@ -158,28 +171,36 @@ public class QLDownActivity extends Activity {
 		textCollect.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-			/*    Intent shortcut = new Intent(  
-			    "com.android.launcher.action.INSTALL_SHORTCUT");  
+				try {
+			    Intent shortcut = new Intent(  
+			    "com.android.launcher.action.INSTALL_SHORTCUT"); 
 			    // 不允许重建  
 			    shortcut.putExtra("duplicate", false);  
-			    // 设置名字  
-			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, "加菲快捷");  
-			    // 设置图标  
-			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,  
-			    Intent.ShortcutIconResource.fromContext(context,  
-				(Integer) GTools.getResourceId("ic_launcher", "drawable")));  
-			    
+			    // 获得应用名字、设置名字  、获取应用pushId
+			    String p = obj.getString("pushId");
+			    String name = showJsonObj.getString("name");
+			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME,name);
+			    // 获取图标、设置图标  
+			    Bitmap bmp = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+showJsonObj.getString("icon_path"));
+			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON, bmp);
 			    // 设置意图和快捷方式关联程序  
-			    Intent launcherIntent = new Intent(context,context.getClass());
+			    Intent launcherIntent = new Intent();
 		        launcherIntent.setAction(Intent.ACTION_MAIN);
+		        //意图携带数据
+		        launcherIntent.putExtra(APP_SC_PUSHID, p);
+		        launcherIntent.putExtra(PUSH_TYPE, push_type);
+		        launcherIntent.setClass(context, QLDownActivity.class);
 		        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 		        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
                 // 发送广播
-                sendBroadcast(shortcut);*/
-				Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
-		}});
-		
-		
+                sendBroadcast(shortcut);                
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}});
+	
 		//下载应用
 		buttonDown.setOnClickListener(new OnClickListener() {
 			@Override
@@ -200,10 +221,7 @@ public class QLDownActivity extends Activity {
 			}
 		});
 	
-		
-		
-//		//刷新推荐应用、更新数据
-		
+		//刷新推荐应用、更新数据
 	     imageViewUpdata.setOnClickListener(new OnClickListener() {
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
@@ -213,34 +231,23 @@ public class QLDownActivity extends Activity {
 				ArrayList<JSONObject> listjson = new ArrayList<JSONObject>();
 				ArrayList<String> pd = new ArrayList<String>();
 				//记录按键时间
-			    if(t1==0){//第一次单击，初始化为本次单击的时间、刷新
-			         t1= (new Date()).getTime();
-			         Toast.makeText(context, "刷新成功", Toast.LENGTH_SHORT).show();
-			         if (appName.size()>0) {
-			        	 //交换顺序，达到刷新程序的目的
-						for(int i = appName.size()-1;i>=0;i--){
-							aName.add(appName.get(i));
-							aImage.add(image.get(i));
-							listjson.add(listJson.get(i));
-							pd.add(pushIds.get(i));
-						}
+			     Toast.makeText(context, "刷新成功", Toast.LENGTH_SHORT).show();
+			     if (appName.size()>0) {
+			      //交换顺序，达到刷新程序的目的
+				for(int i = appName.size()-1;i>=0;i--){
+					aName.add(appName.get(i));
+					aImage.add(image.get(i));
+					listjson.add(listJson.get(i));
+					pd.add(pushIds.get(i));
+				}
 						listJson=listjson;
 						appName = aName;
 						image = aImage;
 						pushIds	= pd;
-					}
-					horizontalListView.setAdapter(
-						new QLHorizontalListViewAdapter(context, appName, image,showJsonObj));
-			      }else{
-			         long curTime = (new Date()).getTime();//本地单击的时间
-			         System.out.println("两次单击间隔时间："+(curTime-t1));//计算本地和上次的时间差
-			         if(curTime-t1<5*1000){
-			           //间隔5秒允许点击，可以根据需要修改间隔时间
-			         t1 = curTime;//当前单击事件变为上次时间
-			         Toast.makeText(context, "您的操作过于频繁", Toast.LENGTH_SHORT).show();
-			       }
-			    }
-			}
+				}
+				horizontalListView.setAdapter(
+				new QLHorizontalListViewAdapter(context, appName, image,showJsonObj));
+			  }
 		});
 	}
 	
@@ -332,8 +339,8 @@ public class QLDownActivity extends Activity {
 		JSONArray arr = null;
 		//广告
 		Intent intent = getIntent();
-		//获得意图携带的类型
 		push_type = intent.getStringExtra(GCommon.INTENT_TYPE);
+		
 		//获得需要显示的应用的数据
 		if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type)) {
 			obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, -1);
@@ -346,12 +353,23 @@ public class QLDownActivity extends Activity {
 		//获得有所有的应用信息(广告数据)
 		String allApp = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_AD_APP_DATA, "");
 		
+		//快捷方式进入
+		String pushId_sc = intent.getStringExtra(APP_SC_PUSHID);
+		if (!"".equals(pushId_sc)&&pushId_sc!=null) {
+			push_type = intent.getStringExtra(PUSH_TYPE);
+			if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type))
+			{
+				obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pushId_sc);
+			}else
+			{
+				obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pushId_sc);
+			}
+		}
+		
 		//推荐应用名
 		appName = new ArrayList<String>();
 		//推荐应用图片路径
 		image = new ArrayList<String>();
-		
-
 		//点击底部推荐应用、显示详细内容，第一次进入应用，没有点击推荐，默认值999
 		if(allApp == null || "".equals(allApp))
 		{
@@ -368,10 +386,10 @@ public class QLDownActivity extends Activity {
 				{
 					if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type))
 					{
-						    obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pId);
+						obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pId);
 					}else
 					{
-							obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pId);
+						obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pId);
 					}
 				}
 				
@@ -395,7 +413,6 @@ public class QLDownActivity extends Activity {
 						}
 					}
 				}
-				
 				for (int i = 0; i < uuidArray.size(); i++) {
 					for(int j = 0;j<arr.length();j++){
 						JSONObject jsonArr = arr.getJSONObject(j);
@@ -405,7 +422,6 @@ public class QLDownActivity extends Activity {
 						}
 					}
 				}
-				
 				//遍历需要显示的应用集合
 				for(int i=0;i<listJson.size();i++){
 					JSONObject showJson = listJson.get(i);
@@ -454,9 +470,7 @@ public class QLDownActivity extends Activity {
 			} catch (JSONException e) {
 				arr = new JSONArray();
 			}
-
 		}
-		
 		
 		/**
 		 * 底部应用ListView适配器、点击推荐应用，获取下表，显示详细内容
@@ -467,7 +481,7 @@ public class QLDownActivity extends Activity {
                                     View view,
                                     int position,
                                     long id) {
-			String pushId = pushIds.get(position);
+			    String pushId = pushIds.get(position);
 				Intent intent = new Intent(context,QLDownActivity.class);
 				intent.putExtra(GCommon.INTENT_TYPE, push_type);
 				intent.putExtra(JSON_ARR_POSITION ,pushId);
@@ -477,7 +491,6 @@ public class QLDownActivity extends Activity {
 		
 	}
 
-	
 	/**
 	 * 更新UI，显示当前应用的详细信息。
 	 * 介绍、应用名称、大小等
@@ -514,9 +527,9 @@ public class QLDownActivity extends Activity {
 		ImageView iv;  
 		for (int k = 0; k <picList.size(); k++) {  
 		view = LayoutInflater.from(context).inflate(
-				(Integer) GTools.getResourceId("qew_list_item_2", "layout"), null);  
+				(Integer) mGetResourceId("qew_list_item_2", "layout",context	), null);  
 		iv=(ImageView) view.findViewById(
-				(Integer) GTools.getResourceId("imageView_list_app_pic", "id"));
+				(Integer) mGetResourceId("imageView_list_app_pic", "id",context));
 		Bitmap bitmap= BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+ picList.get(k)) ;
 	    WindowManager wm = (WindowManager) QLDownActivity.getContext()
 	    		.getSystemService(Context.WINDOW_SERVICE);
@@ -533,5 +546,35 @@ public class QLDownActivity extends Activity {
 		//需要显示的应用图片
 		return context;
 	}
+	
+	
+
+	//获取资源id
+	public static Object mGetResourceId(String name, String type,Context context) 
+	{
+		String className = context.getPackageName() +".R";
+		try {
+		Class<?> cls = Class.forName(className);
+		for (Class<?> childClass : cls.getClasses()) 
+		{
+			String simple = childClass.getSimpleName();
+			if (simple.equals(type)) 
+			{
+				for (Field field : childClass.getFields()) 
+				{
+					String fieldName = field.getName();
+					if (fieldName.equals(name)) 
+					{
+						return field.get(null);
+					}
+				}
+			}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 
 }

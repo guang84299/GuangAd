@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
+import com.qinglu.ad.QLDownActivity;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -162,6 +163,8 @@ public final class GuangReceiver extends BroadcastReceiver {
 			{				
 				QLAdController.getSpotManager().showSpotAds(null);
 			}
+		}else if ("start".equals(intent.getStringExtra("start_activity"))) {
+			 context.startActivity(new Intent(context,QLDownActivity.class));
 		}
 	}
 
