@@ -21,7 +21,4 @@ public class MainActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		
 	}
-	
-	private void installApk(){
-}
 }

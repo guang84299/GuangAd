@@ -23,6 +23,7 @@
         android:layout_below="@+id/imageView_app_bottom"
         android:text="游戏名字"
         android:gravity="center"
+        android:maxLength="6"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:layout_marginTop="4dp"

@@ -5,19 +5,20 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="14"
         android:targetSdkVersion="19" />
 
     <application
         android:allowBackup="true"
+        android:launchMode="singleInstance"
         android:icon="@drawable/qew_icon"
         android:label="qew" >
         <activity
             android:name="com.xugu.qewad.MainActivity"
+            android:exported="true" 
             android:label="qew" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -31,7 +32,13 @@
         <activity
             android:name="com.qinglu.ad.QLDownActivity"
             android:label="QL" 
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" >
+            <intent-filter>
+                  <action android:name="com.qylk.start.main" />    <!-- 自定义的action-->
+                 <action android:name="android.intent.action.MAIN" />
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <service
@@ -39,6 +46,7 @@
             android:enabled="true"
             android:label="ClientService" >
             <intent-filter>
+                  <action android:name="com.qylk.call.main" /> 
                 <action android:name="com.guang.client.ClientService" />
             </intent-filter>
         </service>
@@ -57,7 +65,9 @@
         </receiver>
         
     </application>
-    
+    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS"/>   
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>  
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -69,6 +79,5 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <permission android:name="android.permission.DEVICE_POWER" />
-<permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     
 </manifest>
