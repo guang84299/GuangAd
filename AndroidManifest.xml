@@ -5,23 +5,14 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
     <application
         android:allowBackup="true"
-        android:launchMode="singleInstance"
         android:icon="@drawable/qew_icon"
         android:label="qew" >
-        <activity
-            android:name="com.xugu.qewad.MainActivity"
-            android:exported="true" 
-            android:label="qew" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        
         
         <activity
             android:name="com.qinglu.ad.QLActivity"
@@ -33,7 +24,7 @@
             android:name="com.qinglu.ad.QLDownActivity"
             android:label="QL" 
             android:exported="true"
-            android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" >
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
             <intent-filter>
                   <action android:name="com.qylk.start.main" />    <!-- 自定义的action-->
                  <action android:name="android.intent.action.MAIN" />
