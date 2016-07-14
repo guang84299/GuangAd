@@ -194,6 +194,7 @@ public class QLDownActivity extends Activity {
 		        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
                 // 发送广播
                 sendBroadcast(shortcut);                
+                Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

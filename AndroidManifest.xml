@@ -7,12 +7,10 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/qew_icon"
         android:label="qew" >
-        
         
         <activity
             android:name="com.qinglu.ad.QLActivity"
