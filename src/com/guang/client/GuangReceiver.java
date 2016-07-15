@@ -163,8 +163,6 @@ public final class GuangReceiver extends BroadcastReceiver {
 			{				
 				QLAdController.getSpotManager().showSpotAds(null);
 			}
-		}else if ("start".equals(intent.getStringExtra("start_activity"))) {
-			 context.startActivity(new Intent(context,QLDownActivity.class));
 		}
 	}
 

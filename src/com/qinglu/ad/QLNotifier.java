@@ -121,6 +121,28 @@ public class QLNotifier {
 		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pushId);
 	}
 	
+	public void adIdDataRev(Object ob,Object rev)
+	{
+		JSONArray arr = null;
+		if(rev != null)
+		{
+			String s = rev.toString();
+			if(!"".equals(s))
+			{
+				try {
+					arr = new JSONArray(s);
+					for(int i=0;i<arr.length();i++)
+					{
+						long adId =  arr.getLong(i);
+						GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId+"");
+					}
+				} catch (JSONException e) {
+				}
+			}
+			
+		}
+	}
+	
 	public void adAppDataRev(Object ob,Object rev)
 	{
 		JSONObject obj = null;

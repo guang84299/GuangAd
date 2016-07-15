@@ -70,7 +70,8 @@ public class GCommon {
 	
 	public static final String URI_GET_SPOT = SERVER_ADDRESS + "push_pushSpotByClient";
 	public static final String URI_GET_ADAPP_DATA = SERVER_ADDRESS + "ad_getAdApp";
-	//public static final String URI_GET_AUTO_PUSH_SETTING = SERVER_ADDRESS + "push_getAutoPushSetting";
+	//获取显示级别大于0的id
+	public static final String URI_GET_GET_PUSHAD_IDS = SERVER_ADDRESS + "push_getPushAdIds";
 	
 	//action
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";

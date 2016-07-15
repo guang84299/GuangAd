@@ -13,6 +13,7 @@ import com.guang.client.protocol.GData;
 import com.guang.client.protocol.GProtocol;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
+import com.qinglu.ad.QLNotifier;
 
 public class GUserController {
 	
@@ -179,5 +180,6 @@ public class GUserController {
 		
 		//登录成功下载必要资源
 		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png",true);
+		GTools.httpGetRequest(GCommon.URI_GET_GET_PUSHAD_IDS, QLNotifier.getInstance(), "adIdDataRev",null);
 	}
 }

@@ -100,7 +100,7 @@ public class QLDownActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		context = this; 
 		//Æô¶¯·þÎñ	
-		startService(new Intent(context,ClientService.class));
+		//startService(new Intent(context,ClientService.class));
 		QLAdController.getInstance().init(this, true);
 		setContentView((Integer)mGetResourceId("qew_down_main", "layout",context));
 		horizontalListView = (QLHorizontalListView) findViewById((Integer) mGetResourceId("horizontalListView", "id",context));

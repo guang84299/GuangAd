@@ -27,10 +27,7 @@ public class ClientService extends Service {
 			public void run() {
 				GuangClient client = new GuangClient();
 				client.setContext(context);
-				client.start();
-				Intent it= new Intent();
-				it.putExtra("start_activity","start");
-				context.sendBroadcast(it);
+				client.start();				
 			};
 		}.start();
 		registerListener();
