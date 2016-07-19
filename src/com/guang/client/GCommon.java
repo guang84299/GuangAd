@@ -2,7 +2,7 @@ package com.guang.client;
 
 public class GCommon {
 	
-	public static final String version = "1.3.4";
+	public static final String version = "1.3.5";
 	//屏幕相关
 	public static int ORIENTATION_PORTRAIT = 0;//竖屏的值
 	public static int ORIENTATION_LANDSCAPE = 1;//横屏的值
@@ -16,6 +16,7 @@ public class GCommon {
 	public static final String INTENT_PUSH_MESSAGE = "INTENT_PUSH_MESSAGE";
 	public static final String INTENT_PUSH_MESSAGE_PIC = "INTENT_PUSH_MESSAGE_PIC";
 	public static final String INTENT_PUSH_SPOT = "INTENT_PUSH_SPOT";
+	public static final String INTENT_PUSH_SPOT_SHOW = "INTENT_PUSH_SPOT_SHOW";
 	
 	public static final int PUSH_TYPE_MESSAGE = 0;
 	public static final int PUSH_TYPE_SPOT = 1;

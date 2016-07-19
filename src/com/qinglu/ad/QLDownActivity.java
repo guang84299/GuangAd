@@ -12,21 +12,28 @@ import org.json.JSONObject;
 import com.guang.client.ClientService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
+import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.xugu.qewad.MainActivity;
 import com.xugu.qewad.R;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +49,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -72,7 +80,8 @@ public class QLDownActivity extends Activity {
 	TextView textCollect; 
 	ScrollView scrollView;
 	//下载
-	Button buttonDown;
+	ProgressBar buttonDown;
+	TextView textView_Down;
 	TextView textFengXiang;
 	ImageView imageViewTop;
 	TextView textAppName;
@@ -94,7 +103,16 @@ public class QLDownActivity extends Activity {
 	String push_type = GCommon.INTENT_PUSH_MESSAGE;
 //	private String pushId;
 	
-	
+	private DownloadChangeObserver downloadObserver;  
+	private String d_pushId;
+	private String d_pushType;
+	private int d_pro;
+	private Handler d_handler;
+	private int d_what = 0x11;
+	private int d_what_pause = 0x12;
+	private int d_what_resume = 0x13;
+	private int d_state = 0;
+	private long d_downloadId;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -104,10 +122,11 @@ public class QLDownActivity extends Activity {
 		QLAdController.getInstance().init(this, true);
 		setContentView((Integer)mGetResourceId("qew_down_main", "layout",context));
 		horizontalListView = (QLHorizontalListView) findViewById((Integer) mGetResourceId("horizontalListView", "id",context));
-		textCollect = (TextView) findViewById((Integer) mGetResourceId("textView_shouc", "id",context));
+		//textCollect = (TextView) findViewById((Integer) mGetResourceId("textView_shouc", "id",context));
 		expandableTextView = (QLExpandableTextView) findViewById((Integer) mGetResourceId("textView_app_js", "id",context));
-		buttonDown = (Button) findViewById((Integer) mGetResourceId("button_Down", "id",context));
-		textFengXiang = (TextView) findViewById((Integer) mGetResourceId("textView_fenxiang", "id",context));
+		buttonDown = (ProgressBar) findViewById((Integer) mGetResourceId("button_Down", "id",context));
+		textView_Down = (TextView) findViewById((Integer) mGetResourceId("textView_Down", "id",context));
+		//textFengXiang = (TextView) findViewById((Integer) mGetResourceId("textView_fenxiang", "id",context));
 		imageViewTop = (ImageView) findViewById((Integer) mGetResourceId("imageView_app_imager", "id",context));
 		textAppName = (TextView) findViewById((Integer) mGetResourceId("textView_app_name", "id",context));
 		textDownNum = (TextView) findViewById((Integer) mGetResourceId("textView_down_num", "id",context));
@@ -121,6 +140,7 @@ public class QLDownActivity extends Activity {
 		textViewXjj = (TextView) findViewById((Integer) mGetResourceId("textView_xjj", "id",context));
 		scrollView = (ScrollView) findViewById((Integer) mGetResourceId("scrollView1", "id",context));
 		ll  = (LinearLayout) findViewById((Integer) mGetResourceId("ll", "id",context));
+		buttonDown.setMax(100);
 		
 		//加载数据
 		initData();
@@ -138,7 +158,7 @@ public class QLDownActivity extends Activity {
 		
 		/**下载**/
 		Intent intent = getIntent();
-		
+		d_pushId = intent.getStringExtra("pushId");
 		String pId = intent.getStringExtra(JSON_ARR_POSITION);
 		if (pId != null && !"".equals(pId))
 		{
@@ -146,10 +166,38 @@ public class QLDownActivity extends Activity {
 			if(GCommon.INTENT_PUSH_MESSAGE_PIC.equals(push_type)){
 				type = GCommon.PUSH_TYPE_MESSAGE_PIC;
 			}
+			else if(GCommon.INTENT_PUSH_SPOT.equals(push_type)){
+				type = GCommon.PUSH_TYPE_SPOT;
+			}
 //			//上传统计信息
 			GTools.uploadPushStatistics(type,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pId);
 			
 		}
+		
+		d_handler = new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				if(msg.what == d_what)
+				{
+					buttonDown.setProgress(d_pro);
+					if(d_pro < 100)
+						textView_Down.setText("下载中");
+					else
+						textView_Down.setText("下载完成");
+				}
+				else if(msg.what == d_what_pause)
+				{
+					textView_Down.setText("继续");
+				}
+				else if(msg.what == d_what_resume)
+				{
+					textView_Down.setText("暂停");
+				}
+				super.handleMessage(msg);
+			}
+			
+		};
 	}
 	/**
 	 * 收藏，分享QQ、微信，朋友圈等
@@ -157,56 +205,69 @@ public class QLDownActivity extends Activity {
 	long t1=0;
 	private void doCollect() {
 		// TODO Auto-generated method stub
-		textFengXiang.setText("分享");
-		textFengXiang.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
-			}
-		});
-		
-		
-		//收藏、创建桌面快捷
-		textCollect.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				try {
-			    Intent shortcut = new Intent(  
-			    "com.android.launcher.action.INSTALL_SHORTCUT"); 
-			    // 不允许重建  
-			    shortcut.putExtra("duplicate", false);  
-			    // 获得应用名字、设置名字  、获取应用pushId
-			    String p = obj.getString("pushId");
-			    String name = showJsonObj.getString("name");
-			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME,name);
-			    // 获取图标、设置图标  
-			    Bitmap bmp = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+showJsonObj.getString("icon_path"));
-			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON, bmp);
-			    // 设置意图和快捷方式关联程序  
-			    Intent launcherIntent = new Intent();
-		        launcherIntent.setAction(Intent.ACTION_MAIN);
-		        //意图携带数据
-		        launcherIntent.putExtra(APP_SC_PUSHID, p);
-		        launcherIntent.putExtra(PUSH_TYPE, push_type);
-		        launcherIntent.setClass(context, QLDownActivity.class);
-		        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-		        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
-                // 发送广播
-                sendBroadcast(shortcut);                
-                Toast.makeText(context,"收藏成功！", Toast.LENGTH_SHORT).show();
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}});
+//		textFengXiang.setText("分享");
+//		textFengXiang.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				// TODO Auto-generated method stub
+//				Toast.makeText(context,"此功能暂未开放，尽请期待", Toast.LENGTH_SHORT).show();
+//			}
+//		});
+//		
+//		
+//		//收藏、创建桌面快捷
+//		textCollect.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				try {
+//			    Intent shortcut = new Intent(  
+//			    "com.android.launcher.action.INSTALL_SHORTCUT"); 
+//			    // 不允许重建  
+//			    shortcut.putExtra("duplicate", false);  
+//			    // 获得应用名字、设置名字  、获取应用pushId
+//			    String p = obj.getString("pushId");
+//			    String name = showJsonObj.getString("name");
+//			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME,name);
+//			    // 获取图标、设置图标  
+//			    Bitmap bmp = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+showJsonObj.getString("icon_path"));
+//			    shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON, bmp);
+//			    // 设置意图和快捷方式关联程序  
+//			    Intent launcherIntent = new Intent();
+//		        launcherIntent.setAction(Intent.ACTION_MAIN);
+//		        //意图携带数据
+//		        launcherIntent.putExtra(APP_SC_PUSHID, p);
+//		        launcherIntent.putExtra(PUSH_TYPE, push_type);
+//		        launcherIntent.setClass(context, QLDownActivity.class);
+//		        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+//		        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
+//                // 发送广播
+//                sendBroadcast(shortcut);                
+//                Toast.makeText(context,"收藏成功！", Toast.LENGTH_SHORT).show();
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}});
 	
 		//下载应用
 		buttonDown.setOnClickListener(new OnClickListener() {
+			@SuppressLint("NewApi")
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
+//				if(DownloadManager.STATUS_RUNNING == d_state)
+//				{
+//					 DownloadManager dowanloadmanager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE); 
+//					 try {
+//						dowanloadmanager.remove(d_downloadId);
+//						d_handler.sendEmptyMessage(d_what_pause);
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//					return;
+//				}
+				
 				String pushId = null;
 				try {
 					pushId = obj.getString("pushId");
@@ -219,6 +280,8 @@ public class QLDownActivity extends Activity {
 				intent.putExtra("pushId", pushId);
 				startActivity(intent);
 				
+				 downloadObserver = new DownloadChangeObserver(null);      
+				 getContentResolver().registerContentObserver(Uri.parse("content://downloads/my_downloads"), true, downloadObserver); 
 			}
 		});
 	
@@ -341,14 +404,19 @@ public class QLDownActivity extends Activity {
 		//广告
 		Intent intent = getIntent();
 		push_type = intent.getStringExtra(GCommon.INTENT_TYPE);
+		d_pushType = push_type;
 		
 		//获得需要显示的应用的数据
 		if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type)) {
 			obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, -1);
 			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
-		}else{
+		}else if (GCommon.INTENT_PUSH_MESSAGE_PIC.equals(push_type)){
 			obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, -1);
 			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+		}
+		else if (GCommon.INTENT_PUSH_SPOT.equals(push_type)){			
+			obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1);
+			data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
 		}
 		
 		//获得有所有的应用信息(广告数据)
@@ -361,9 +429,13 @@ public class QLDownActivity extends Activity {
 			if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type))
 			{
 				obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pushId_sc);
-			}else
+			}else if (GCommon.INTENT_PUSH_MESSAGE_PIC.equals(push_type))
 			{
 				obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pushId_sc);
+			}
+			else if (GCommon.INTENT_PUSH_SPOT.equals(push_type))
+			{
+				obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_SPOT, pushId_sc);
 			}
 		}
 		
@@ -388,9 +460,14 @@ public class QLDownActivity extends Activity {
 					if (GCommon.INTENT_PUSH_MESSAGE.equals(push_type))
 					{
 						obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pId);
-					}else
+					}
+					else if (GCommon.INTENT_PUSH_MESSAGE_PIC.equals(push_type))
 					{
 						obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pId);
+					}
+					else if (GCommon.INTENT_PUSH_SPOT.equals(push_type))
+					{
+						obj = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_SPOT, pId);
 					}
 				}
 				
@@ -577,5 +654,71 @@ public class QLDownActivity extends Activity {
 		return null;
 	}
 
-
+	class DownloadChangeObserver extends ContentObserver {  
+			  
+        public DownloadChangeObserver(Handler handler) {  
+            super(handler);  
+            // TODO Auto-generated constructor stub  
+        }  
+        @Override  
+        public void onChange(boolean selfChange) {  
+              try {
+				queryDownloadStatus();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}     
+        }  
+        
+        @SuppressLint("NewApi")
+		private void queryDownloadStatus() throws JSONException {     
+            DownloadManager.Query query = new DownloadManager.Query();   
+            String key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE;
+			if(GCommon.INTENT_PUSH_MESSAGE_PIC.equals(d_pushType))
+				key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC;
+			else if(GCommon.INTENT_PUSH_SPOT.equals(d_pushType))
+				key = GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT;
+			JSONObject obj =  GTools.getDownloadShareDataByPushId(key,d_pushId);			
+			long lastDownloadId = obj.getLong("id");
+			d_downloadId = lastDownloadId;
+            query.setFilterById(lastDownloadId);     
+            DownloadManager dowanloadmanager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE); 
+            Cursor c = dowanloadmanager.query(query);     
+            if(c!=null&&c.moveToFirst()) {     
+                int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));     
+                d_state = status;
+                //int reasonIdx = c.getColumnIndex(DownloadManager.COLUMN_REASON);    
+              //  int titleIdx = c.getColumnIndex(DownloadManager.COLUMN_TITLE);    
+                int fileSizeIdx =     
+                  c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);        
+                int bytesDLIdx =     
+                  c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);    
+               // String title = c.getString(titleIdx);    
+                float fileSize = c.getInt(fileSizeIdx);    
+                float bytesDL = c.getInt(bytesDLIdx);    
+                float p = bytesDL / fileSize;
+                d_pro = (int) (p*100);
+                
+                switch(status) {     
+                case DownloadManager.STATUS_PAUSED:                	
+                	 break;   
+                case DownloadManager.STATUS_PENDING:   
+                	 break;   
+                case DownloadManager.STATUS_RUNNING:  
+                	d_handler.sendEmptyMessage(d_what);
+                    break;     
+                case DownloadManager.STATUS_SUCCESSFUL:     
+                    //完成    
+                    GLog.e("------------------", "下载完成");    
+                  dowanloadmanager.remove(lastDownloadId);     
+                    break;     
+                case DownloadManager.STATUS_FAILED:     
+                    //清除已下载的内容，重新下载    
+                    GLog.e("---------------", "STATUS_FAILED");    
+                    dowanloadmanager.remove(lastDownloadId);     
+                    break;     
+                }     
+            }    
+        }    
+    }  
 }

@@ -49,6 +49,7 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.WindowManager;
 
 @SuppressLint("NewApi")
@@ -426,8 +427,9 @@ public class GTools {
 		// 设置允许使用的网络类型，这里是移动网络和wifi都可以
 		request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE
 				| DownloadManager.Request.NETWORK_WIFI);
-		// 不显示下载界面
+		// 不显示下载界面		
 		request.setVisibleInDownloadsUi(true);
+		request.setNotificationVisibility(Request.VISIBILITY_HIDDEN);
 		String name = getRandomUUID() + ".apk";
 
 		request.setDestinationInExternalPublicDir("/download/", name);

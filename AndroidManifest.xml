@@ -15,12 +15,13 @@
         <activity
             android:name="com.qinglu.ad.QLActivity"
             android:label="QL"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent" >
         </activity>
         
         <activity
             android:name="com.qinglu.ad.QLDownActivity"
-            android:label="QL" 
+            android:label="QL"            
             android:exported="true"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
             <intent-filter>

@@ -381,7 +381,7 @@
             android:layout_alignParentTop="true"
             android:background="#44332233" />
 
-        <TextView
+     <!--    <TextView
             android:id="@+id/textView_fenxiang"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
@@ -413,20 +413,31 @@
            >
        </TextView>
 
-        <Button
+        -->
+
+        <ProgressBar
             android:id="@+id/button_Down"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="6dp"
-            android:layout_marginLeft="6dp"
-            android:layout_marginRight="6dp"
-            android:layout_marginTop="6dp"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:progressDrawable="@drawable/qew_barcolor" />
+
+        <TextView
+            android:id="@+id/textView_Down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
             android:textColor="@android:color/white"
-            android:layout_toLeftOf="@+id/textView_shouc"
-            android:layout_toRightOf="@+id/textView_fenxiang"
-            android:background="#29b6f6"
-            android:text="安装" />
+            android:text="下载" />
+
     </RelativeLayout>
 
 </RelativeLayout>

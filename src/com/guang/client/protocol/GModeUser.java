@@ -164,9 +164,13 @@ public class GModeUser {
 	{
 		JSONObject obj = null;
 		String picPath = null;
+		String adId = null;
+		int order = 0;
 		try {
 			 obj = new JSONObject(data);	
 			 picPath = obj.getString("picPath");
+			 adId = obj.getString("adId");
+			 order = obj.getInt("order");
 		} catch (Exception e) {
 		}		
 		
@@ -190,8 +194,11 @@ public class GModeUser {
 		}
 
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, arr.toString());
-		
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath,false);
+		if(order == 0)
+		{
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath,false);
+		}
+		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendSpot success!");
 	}
 	

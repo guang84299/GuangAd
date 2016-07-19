@@ -90,7 +90,7 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 		}
 		Intent intent = new Intent(this.context, QLActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT);
+		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT_SHOW);
 		intent.putExtra("pushId", pushId);
 		this.context.startActivity(intent);
 	}

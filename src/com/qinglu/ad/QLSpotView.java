@@ -199,7 +199,7 @@ public class QLSpotView extends RelativeLayout{
 					layout.removeAllViews();
 					ViewGroup parent = ( ViewGroup )layout.getParent();
 					parent.removeView(layout);
-					Toast.makeText(context, "开始为您下载应用...", 0).show();
+					//Toast.makeText(context, "开始为您下载应用...", 0).show();
 					if(dialogListener != null)
 					{
 						dialogListener.onSpotClick(true);
