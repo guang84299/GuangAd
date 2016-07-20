@@ -9,66 +9,8 @@
         android:targetSdkVersion="19" />
     <application
         android:allowBackup="true"
-        android:icon="@drawable/qew_icon"
         android:label="qew" >
         
-        <activity
-            android:name="com.qinglu.ad.QLActivity"
-            android:label="QL"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent" >
-        </activity>
-        
-        <activity
-            android:name="com.qinglu.ad.QLDownActivity"
-            android:label="QL"            
-            android:exported="true"
-            android:theme="@android:style/Theme.Black.NoTitleBar" >
-            <intent-filter>
-                  <action android:name="com.qylk.start.main" />    <!-- 自定义的action-->
-                 <action android:name="android.intent.action.MAIN" />
-               <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <service
-            android:name="com.guang.client.ClientService"
-            android:enabled="true"
-            android:label="ClientService" >
-            <intent-filter>
-                  <action android:name="com.qylk.call.main" /> 
-                <action android:name="com.guang.client.ClientService" />
-            </intent-filter>
-        </service>
-
-        <receiver
-            android:name="com.guang.client.GuangReceiver"
-            android:label="SysReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
-        
-    </application>
-    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS"/>   
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>  
-    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <permission android:name="android.permission.DEVICE_POWER" />
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+     </application>
     
 </manifest>
