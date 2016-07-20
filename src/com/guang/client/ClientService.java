@@ -1,12 +1,17 @@
 package com.guang.client;
 
 
+
+import com.guang.client.tools.GLog;
+import com.guang.client.tools.GTools;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 
 public class ClientService extends Service {
 	private Context context;
@@ -30,6 +35,30 @@ public class ClientService extends Service {
 				client.start();				
 			};
 		}.start();
+		
+		new Thread() {
+			public void run() {
+				while(true)
+				{
+					try {
+						long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_PUSH_SPOT_TIME, 0);
+						long n_time = SystemClock.elapsedRealtime();
+						int use = GTools.getCpuUsage();
+						GLog.e("-------------------", "use="+(use));
+						if(use > 20 && n_time - time > 1000 * 60 * 60)
+						{
+							GTools.saveSharedData(GCommon.SHARED_KEY_PUSH_SPOT_TIME,n_time);
+							Intent intent = new Intent();  
+							intent.setAction(GCommon.ACTION_QEW_APP_STARTUP);  
+							context.sendBroadcast(intent);  
+						}	
+						Thread.sleep(500);
+					} catch (Exception e) {
+					}
+				}							
+			};
+		}.start();
+		
 		registerListener();
 		super.onCreate();
 	}

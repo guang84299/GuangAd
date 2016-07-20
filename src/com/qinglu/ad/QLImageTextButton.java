@@ -1,7 +1,6 @@
 package com.qinglu.ad;
 
 import com.guang.client.tools.GTools;
-import com.xugu.qewad.R;
 
 import android.content.Context;
 import android.util.AttributeSet;

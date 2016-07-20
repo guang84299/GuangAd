@@ -1,8 +1,10 @@
 package com.guang.client.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -353,11 +355,14 @@ public class GTools {
 	public static void downloadRes(final String url,
 			final Object target, final String callback, final Object data,final boolean isDelete)
 	{
-		final Context context = GuangClient.getContext();
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
+				Context context = GuangClient.getContext();
+				if(context == null)
+					context = QLAdController.getInstance().getContext();
+				
 				String sdata = (String) data;
 				String pic = sdata;
 				String responseStr = "0";
@@ -399,7 +404,7 @@ public class GTools {
 					is.close();
 					responseStr = "1";
 				} catch (Exception e) {
-					GLog.e(TAG, "===post请求资源异常===");
+					GLog.e(TAG, "===post请求资源异常==="+e.getLocalizedMessage());
 					e.printStackTrace();
 				}
 				finally {
@@ -641,5 +646,37 @@ public class GTools {
 		} catch (Exception e) {
 		}
 		return null;
+	}
+	
+	//获取cpu占用
+	public static int getCpuUsage()
+	{
+		try {
+			String Result;
+	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
+
+	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
+	    	while((Result=br.readLine()) != null)
+	    	{
+		    	if(Result.trim().length()<1)
+		    	{
+		    		continue;
+		    	}
+		    	else
+		    	{
+		    		String[] CPUusr = Result.split("%");
+		        	String[] SYSusage = CPUusr[1].split("System");
+		        	String r = SYSusage[1].trim();
+		        	
+		        	if(r != null && !"".equals(r))
+		        	{
+		        		return Integer.parseInt(r);
+		        	}
+		        	break;
+		    	}
+	    	}
+		} catch (Exception e) {
+		}	
+		return 0;
 	}
 }

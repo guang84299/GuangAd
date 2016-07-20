@@ -144,25 +144,8 @@ public final class GuangReceiver extends BroadcastReceiver {
 		} 
 		
 		else if (GCommon.ACTION_QEW_APP_STARTUP.equals(action))
-		{
-			ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-			List<RunningServiceInfo> taskInfo = activityManager.getRunningServices(200);
-			
-			long size = taskInfo.size();			
-			long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SHOWE_SPOT_TIME, 0);
-			if(time == 0)
-			{
-				GTools.saveSharedData(GCommon.SHARED_KEY_SHOWE_SPOT_TIME,size);
-				return;
-			}			
-			if(size != time)
-			{
-				GTools.saveSharedData(GCommon.SHARED_KEY_SHOWE_SPOT_TIME,size);
-			}
-			if(size > time)
-			{				
-				QLAdController.getSpotManager().showSpotAds(null);
-			}
+		{		
+			QLAdController.getSpotManager().showSpotAds(null);
 		}
 	}
 

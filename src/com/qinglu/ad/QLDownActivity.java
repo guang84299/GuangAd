@@ -15,7 +15,6 @@ import com.guang.client.GuangClient;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.xugu.qewad.MainActivity;
-import com.xugu.qewad.R;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

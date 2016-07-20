@@ -1,5 +1,7 @@
 package com.qinglu.ad;
 
+
+
 import com.guang.client.ClientService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
@@ -7,12 +9,8 @@ import com.guang.client.tools.GTools;
 import com.qinglu.ad.impl.qinglu.QLSpotManagerQingLu;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.RemoteViews;
 
 
 public class QLAdController {
@@ -22,7 +20,7 @@ public class QLAdController {
 	
 	private QLAdController()
 	{
-
+		
 	}
 	
 	public static QLAdController getInstance()
@@ -30,7 +28,7 @@ public class QLAdController {
 		if(controller == null)
 		{
 			controller = new QLAdController();					
-		}			
+		}	
 		return controller;
 	}
 	
@@ -41,14 +39,16 @@ public class QLAdController {
 		spotManager.updateContext(GuangClient.getContext());
 		return spotManager;
 	}
+	
+	
 		
-	public void init(Context context,boolean isTestModel)
+	public void init(Context context,Boolean isTestModel)
 	{
 		this.context = context;
 		
 		GTools.saveSharedData(GCommon.SHARED_KEY_TESTMODEL,isTestModel);
 		
-		startService();
+		 startService();
 	}
 	@SuppressLint("NewApi")
 	public void startService()

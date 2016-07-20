@@ -41,7 +41,7 @@ public class GCommon {
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE = "pushtype_message";
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE_PIC = "pushtype_message_pic";
 	public static final String SHARED_KEY_PUSHTYPE_SPOT = "pushtype_spot";
-	public static final String SHARED_KEY_SHOWE_SPOT_TIME = "show_spot_time";
+	public static final String SHARED_KEY_PUSH_SPOT_TIME = "push_spot_time";
 	
 	//œ¬‘ÿid
 	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE = "downloadad_message";
