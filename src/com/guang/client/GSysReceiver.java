@@ -23,10 +23,10 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 @SuppressLint("NewApi")
-public final class GuangReceiver extends BroadcastReceiver {
+public final class GSysReceiver extends BroadcastReceiver {
 
 	
-	public GuangReceiver() {
+	public GSysReceiver() {
 		
 	}
 
@@ -35,7 +35,7 @@ public final class GuangReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {		
 		String action = intent.getAction();
-		GLog.e("GuangReceiver", "onReceive()..."+action);
+		GLog.e("GSysReceiver", "onReceive()..."+action);
 		if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
 			long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);			
 			try {

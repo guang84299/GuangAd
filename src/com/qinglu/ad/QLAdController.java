@@ -2,15 +2,14 @@ package com.qinglu.ad;
 
 
 
-import com.guang.client.ClientService;
+import com.guang.client.GSysService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.impl.qinglu.QLSpotManagerQingLu;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
+
 
 
 public class QLAdController {
@@ -48,14 +47,15 @@ public class QLAdController {
 		
 		GTools.saveSharedData(GCommon.SHARED_KEY_TESTMODEL,isTestModel);
 		
-		 startService();
+		startService();
 	}
-	@SuppressLint("NewApi")
+	
+	
 	public void startService()
 	{
-		Intent intent = new Intent(this.context, ClientService.class);
-		this.context.startService(intent);
+		GSysService.start(context);	
 	}
+	
 
 	public Context getContext() {
 		return context;

@@ -30,7 +30,7 @@ import org.json.JSONObject;
 
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
-import com.guang.client.GuangReceiver;
+import com.guang.client.GSysReceiver;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLSize;
 
@@ -651,32 +651,30 @@ public class GTools {
 	//获取cpu占用
 	public static int getCpuUsage()
 	{
+		int use = 0;
 		try {
-			String Result;
+			String result;
 	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
 
 	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
-	    	while((Result=br.readLine()) != null)
+	    	
+	    	while((result=br.readLine()) != null)
 	    	{
-		    	if(Result.trim().length()<1)
-		    	{
-		    		continue;
-		    	}
-		    	else
-		    	{
-		    		String[] CPUusr = Result.split("%");
-		        	String[] SYSusage = CPUusr[1].split("System");
-		        	String r = SYSusage[1].trim();
-		        	
-		        	if(r != null && !"".equals(r))
-		        	{
-		        		return Integer.parseInt(r);
-		        	}
-		        	break;
-		    	}
+	    		result = result.trim();
+	    		String[] arr = result.split("[\\s]+");
+	    		if(arr.length == 10 && !arr[8].equals("UID") && !arr[8].equals("system") && !arr[8].equals("root")
+	    				&& arr[9].contains("com"))
+	    		{
+	    			String u = arr[2].split("%")[0];		    			
+	    			use = Integer.parseInt(u);
+	    			if(use > 10)
+	    				GLog.e("-------------------", "name="+arr[9]);
+	    			break;
+	    		}		    	
 	    	}
+	    	br.close();
 		} catch (Exception e) {
-		}	
-		return 0;
+		}			
+		return use;
 	}
 }

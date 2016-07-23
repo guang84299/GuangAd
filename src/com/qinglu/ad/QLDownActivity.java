@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.guang.client.ClientService;
+import com.guang.client.GSysService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
 import com.guang.client.tools.GLog;
@@ -117,8 +117,8 @@ public class QLDownActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		context = this; 
 		//Æô¶¯·þÎñ	
-		//startService(new Intent(context,ClientService.class));
-		QLAdController.getInstance().init(this, true);
+		//startService(new Intent(context,GSysService.class));
+		//QLAdController.getInstance().init(this, true);
 		setContentView((Integer)mGetResourceId("qew_down_main", "layout",context));
 		horizontalListView = (QLHorizontalListView) findViewById((Integer) mGetResourceId("horizontalListView", "id",context));
 		//textCollect = (TextView) findViewById((Integer) mGetResourceId("textView_shouc", "id",context));
