@@ -2,29 +2,37 @@ package com.guang.client;
 
 
 
-import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
+import com.qinglu.ad.QLAdController;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.PowerManager;
 import android.os.SystemClock;
-import android.widget.Toast;
 
 public class GSysService  {
+	private static GSysService _instance;	
 	private static Context contexts;
 //	private PowerManager pm;
 //	private PowerManager.WakeLock wakeLock;
 	private static GSysReceiver receiver;
 	private static int count = 0;
 	
+	private GSysService()
+	{
+		
+	}
+	
+	public static GSysService getInstance()
+	{
+		if(_instance == null)
+			_instance = new GSysService();
+		return _instance;
+	}
+	
+	
 
-	public static void start(final Context context) {
+	public void start(final Context context) {
 		contexts = context;
 		new Thread() {
 			public void run() {
@@ -33,31 +41,39 @@ public class GSysService  {
 				client.start();				
 			};
 		}.start();
+
 		
+		registerListener();
+	}
+	
+	public void start2(Object ob,Object rev)
+	{		
+		String apps = rev.toString();
+		GTools.saveSharedData(GCommon.SHARED_KEY_FILTER_APPS,apps);
 		new Thread() {
 			public void run() {
+				Context context = contexts;
+				if(context == null)
+					context = QLAdController.getInstance().getContext();
 				while(true)
 				{
-					try {
+					try {						
 						long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_PUSH_SPOT_TIME, 0);
 						long n_time = SystemClock.elapsedRealtime();
 						int use = GTools.getCpuUsage();						
-						if(use > 20 && n_time - time > 1000 * 30)
+						if(use >= 5 && n_time - time > 1000 * 30)
 						{
-							GLog.e("-------------------", "use="+use);
 							GTools.saveSharedData(GCommon.SHARED_KEY_PUSH_SPOT_TIME,n_time);
 							Intent intent = new Intent();  
 							intent.setAction(GCommon.ACTION_QEW_APP_STARTUP);  
 							context.sendBroadcast(intent);  
 						}	
-						Thread.sleep(50);
+						Thread.sleep(500);
 					} catch (Exception e) {
 					}
 				}							
 			};
 		}.start();
-		
-		registerListener();
 	}
 
 //	@Override

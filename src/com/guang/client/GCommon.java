@@ -18,6 +18,8 @@ public class GCommon {
 	public static final String INTENT_PUSH_SPOT = "INTENT_PUSH_SPOT";
 	public static final String INTENT_PUSH_SPOT_SHOW = "INTENT_PUSH_SPOT_SHOW";
 	
+	public static final String INTENT_SPOT_TYPE = "INTENT_SPOT_TYPE";
+	
 	public static final int PUSH_TYPE_MESSAGE = 0;
 	public static final int PUSH_TYPE_SPOT = 1;
 	public static final int PUSH_TYPE_MESSAGE_PIC = 2;
@@ -25,7 +27,7 @@ public class GCommon {
 	public static final int STATISTICS_TYPE_NORMAL = 0;
 	public static final int STATISTICS_TYPE_PUSH = 1;
 	
-	public static final int SPOT_TYPE_NORMAL = 0;
+	public static final int SPOT_TYPE_APP = 0;
 	public static final int SPOT_TYPE_PUSH = 1;
 	
 	public static final int UPLOAD_PUSHTYPE_SHOWNUM = 0;
@@ -42,6 +44,7 @@ public class GCommon {
 	public static final String SHARED_KEY_PUSHTYPE_MESSAGE_PIC = "pushtype_message_pic";
 	public static final String SHARED_KEY_PUSHTYPE_SPOT = "pushtype_spot";
 	public static final String SHARED_KEY_PUSH_SPOT_TIME = "push_spot_time";
+	public static final String SHARED_KEY_FILTER_APPS = "filter_apps";
 	
 	//下载id
 	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE = "downloadad_message";
@@ -70,9 +73,14 @@ public class GCommon {
 	public static final String URI_UPLOAD_PUSHAD_INSTALLNUM = SERVER_ADDRESS + "pushStatistics_updateInstallNum";
 	
 	public static final String URI_GET_SPOT = SERVER_ADDRESS + "push_pushSpotByClient";
+	public static final String URI_GET_NOTIFY = SERVER_ADDRESS + "push_pushNotifyByClient";
 	public static final String URI_GET_ADAPP_DATA = SERVER_ADDRESS + "ad_getAdApp";
 	//获取显示级别大于0的id
 	public static final String URI_GET_GET_PUSHAD_IDS = SERVER_ADDRESS + "push_getPushAdIds";
+	//获取过滤的app包名
+	public static final String URI_GET_SDK_FILTER_APP = SERVER_ADDRESS + "sdk_findSdkFilterApp";
+	//获取自动推送配置信息
+	public static final String URI_GET_AUTO_PUSH_SETTING = SERVER_ADDRESS + "push_getAutoPushSetting";
 	
 	//action
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";

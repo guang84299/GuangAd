@@ -8,11 +8,14 @@ import android.telephony.TelephonyManager;
 
 import com.google.gson.Gson;
 import com.guang.client.GCommon;
+import com.guang.client.GSysService;
+import com.guang.client.GuangClient;
 import com.guang.client.mode.GUser;
 import com.guang.client.protocol.GData;
 import com.guang.client.protocol.GProtocol;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
+import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLNotifier;
 
 public class GUserController {
@@ -181,5 +184,43 @@ public class GUserController {
 		//登录成功下载必要资源
 		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png",true);
 		GTools.httpGetRequest(GCommon.URI_GET_GET_PUSHAD_IDS, QLNotifier.getInstance(), "adIdDataRev",null);
+		//得到app过滤资源
+		GTools.httpGetRequest(GCommon.URI_GET_SDK_FILTER_APP, GSysService.getInstance(), "start2",null);
+		//获取系统配置信息
+		GTools.httpGetRequest(GCommon.URI_GET_AUTO_PUSH_SETTING, this, "revAutoPushSetting",null);
+	}
+	
+	public void revAutoPushSetting(Object ob,Object rev)
+	{
+		JSONObject obj = null;
+		boolean autoState = false;
+		int autoPushType = 1;
+		float waitTime = 0.1f;
+		try {
+			 obj = new JSONObject(rev.toString());	
+			 autoState = obj.getBoolean("autoState");
+			 autoPushType = obj.getInt("autoPushType");
+			 waitTime = (float) obj.getDouble("waitTime");
+		} catch (Exception e) {
+		}
+		final int type = autoPushType;
+		final float time = waitTime;
+		
+		if(autoState)
+		{
+			new Thread(){
+				public void run() {
+					try {
+						Thread.sleep((long) (1000*60*time));
+						if(type == 1)
+							QLNotifier.getInstance().showNotify();
+						else
+							QLAdController.getSpotManager().showSpotAds(GuangClient.getContext());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				};
+			}.start();
+		}
 	}
 }

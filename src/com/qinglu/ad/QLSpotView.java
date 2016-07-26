@@ -15,6 +15,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +29,11 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class QLSpotView extends RelativeLayout{
 	private int id;
+	private  int s = 3;//关闭时间
 	private ImageView close;
 	private Bitmap viewBm;
 	private Bitmap closeBm;
@@ -42,11 +45,6 @@ public class QLSpotView extends RelativeLayout{
 		super(context);
 	}
 	
-	public QLSpotView(Context context,int animationType) {
-		super(context);
-		this.type = GCommon.SPOT_TYPE_NORMAL;
-		this.init(context, animationType);
-	}
 	
 	public QLSpotView(Context context,int animationType,int type,QLSpotDialogListener dialogListener) {
 		super(context);
@@ -75,29 +73,176 @@ public class QLSpotView extends RelativeLayout{
 	
 	private void init(final Context context,int animationType)
 	{
-		SharedPreferences mySharedPreferences = GTools.getSharedPreferences();
-		try {
-			JSONObject obj = null;
-			if(this.type == GCommon.SPOT_TYPE_NORMAL)
+		JSONObject obj =  GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1);	
+		if(type == GCommon.SPOT_TYPE_PUSH)
+			getSpotViewPush(context,animationType,obj);		
+		else if(type == GCommon.SPOT_TYPE_APP)
+			getSpotViewApp(context,animationType,obj);		
+	}
+	
+	@SuppressLint("NewApi")
+	private void getSpotViewApp(final Context context,int animationType,final JSONObject obj)
+	{
+		ImageView view = new ImageView(context);
+		try {			
+			viewBm = BitmapFactory.decodeFile(context.getFilesDir().getPath()+"/"+ obj.getString("picPath")) ;
+			view.setImageBitmap(viewBm);
+			//底层容器			
+			final QLSpotView layout = this;
+
+			RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);		
+			layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+			//int dir = context.getResources().getConfiguration().orientation;
+			QLSize ss = GTools.getScreenSize(context);
+			layoutParams.width = ss.width;
+			layoutParams.height = ss.height;
+			
+			view.setId(1);
+			view.setScaleType(ScaleType.FIT_XY);
+
+			layout.addView(view, layoutParams);	
+			
+			//关闭按钮		
+			RelativeLayout.LayoutParams paramsClose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+			
+			LinearLayout layoutGray = new LinearLayout(context);
+			layoutGray.setBackgroundColor(Color.BLACK);
+			layoutGray.setAlpha(0.6f);
+			layoutGray.setId(2);
+			layoutGray.setLayoutParams(paramsClose);
+			layout.addView(layoutGray);	
+			
+			paramsClose.width = (int) (ss.width*0.15);
+			paramsClose.height = (int) (ss.width*0.08);
+			
+			RelativeLayout.LayoutParams paramsCloseText = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+			final TextView closeText = new TextView(context);
+			closeText.setText(s+" 跳过");
+			closeText.setTextColor(Color.WHITE);
+			closeText.setTextSize(16);
+			closeText.setLayoutParams(paramsCloseText);
+			layout.addView(closeText);
+			
+			paramsCloseText.width = (int) (paramsClose.width*0.9);
+			paramsCloseText.height = (int) (paramsClose.height*0.9);
+			
+			int m_w = (paramsClose.width - paramsCloseText.width)/2;
+			int m_h = (paramsClose.height - paramsCloseText.height)/2;
+			paramsCloseText.setMargins(0, 20+m_h, 20+m_w, 0);
+			paramsCloseText.addRule(RelativeLayout.ALIGN_TOP, 1);
+			paramsCloseText.addRule(RelativeLayout.ALIGN_RIGHT, 1);
+			paramsClose.addRule(RelativeLayout.ALIGN_TOP, 1);
+			paramsClose.addRule(RelativeLayout.ALIGN_RIGHT, 1);
+			paramsClose.setMargins(0, 20, 20, 0);
+			
+			final Handler handler = new Handler(){
+				@Override
+				public void handleMessage(Message msg) {
+					if(msg.what == 0x11)
+					{
+						if(s == -1)
+						{
+							layout.removeAllViews();
+							ViewGroup parent = ( ViewGroup )layout.getParent();
+							parent.removeView(layout);
+							
+							if(viewBm != null && !viewBm.isRecycled())
+							{
+								viewBm.recycle();
+								viewBm = null;
+							}					
+							System.gc();
+							
+							if(dialogListener != null)
+							{
+								dialogListener.onSpotClosed();
+							}
+						}
+						else
+						{
+							closeText.setText(s+" 跳过");
+						}				
+					}
+					super.handleMessage(msg);
+				}
+			};
+			
+			new Thread(){
+				public void run() {
+					try {
+						
+						while(s > -1)
+						{
+							Thread.sleep(1200);
+							s --;
+							handler.sendEmptyMessage(0x11);				
+						}				
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				};
+			}.start();
+			
+			view.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					s = -2;
+					layout.removeAllViews();
+					ViewGroup parent = ( ViewGroup )layout.getParent();
+					parent.removeView(layout);
+					//Toast.makeText(context, "开始为您下载应用...", 0).show();
+					if(dialogListener != null)
+					{
+						dialogListener.onSpotClick(true);
+					}
+					if(viewBm != null && !viewBm.isRecycled())
+					{
+						viewBm.recycle();
+						viewBm = null;
+					}					
+					System.gc();
+					if(dialogListener != null)
+					{
+						dialogListener.onSpotClosed();
+					}
+				}
+			});
+			
+			closeText.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					s = -2;
+					layout.removeAllViews();
+					ViewGroup parent = ( ViewGroup )layout.getParent();
+					parent.removeView(layout);
+					
+					if(viewBm != null && !viewBm.isRecycled())
+					{
+						viewBm.recycle();
+						viewBm = null;
+					}					
+					System.gc();
+					
+					if(dialogListener != null)
+					{
+						dialogListener.onSpotClosed();
+					}
+				}
+			});
+			if(dialogListener != null)
 			{
-				JSONArray arr = new JSONArray(mySharedPreferences.getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, ""));
-				obj = arr.getJSONObject((int)(Math.random()*10%arr.length()));
+				dialogListener.onShowSuccess();
 			}
-			else
-			{
-				obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1);	
-				//obj = new JSONObject(mySharedPreferences.getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, ""));
-			}
-			getSpotView(context,animationType,obj);
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}			
-		
+		}		
 	}
 
 	@SuppressLint("NewApi")
-	private void getSpotView(final Context context,int animationType,final JSONObject obj)
+	private void getSpotViewPush(final Context context,int animationType,final JSONObject obj)
 	{
 		ImageView view = new ImageView(context);
 		try {			
@@ -118,7 +263,7 @@ public class QLSpotView extends RelativeLayout{
 			//广告
 			QLSize ss = GTools.getScreenSize(context);
 			RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-			// 设置广告条的悬浮位置
+			
 			layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
 			float width = viewBm.getWidth();
 			float height = viewBm.getHeight();

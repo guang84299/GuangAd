@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 @SuppressLint("NewApi")
@@ -200,5 +201,33 @@ public class QLNotifier {
 			GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, pic_path_6,false);
 		
 		GTools.saveSharedData(GCommon.SHARED_KEY_AD_APP_DATA, arr.toString());
+	}
+	
+	
+	@SuppressLint("NewApi")
+	public void showNotifyPic(Object ob,Object rev) throws JSONException {
+		Context context = GuangClient.getContext();
+		JSONObject obj = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, -1);
+//		String title = obj.getString("title");
+//		String message = obj.getString("message");
+		String picPath = obj.getString("picPath");
+		String pushId = obj.getString("pushId");
+		Intent intent = new Intent(context,QLNotifyActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_MESSAGE_PIC);
+		intent.putExtra("pushId", pushId);
+		intent.putExtra("picPath", picPath);
+		context.startActivity(intent);
+	}
+	
+	public void showNotify()
+	{
+		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("username", name);
+		} catch (Exception e) {
+		}
+		GTools.httpPostRequest(GCommon.URI_GET_NOTIFY, null, null, data);
 	}
 }

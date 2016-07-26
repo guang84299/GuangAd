@@ -155,7 +155,7 @@ public class GModeUser {
 		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, arr.toString());		
 		if(order == 0)
 		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showPic", picPath,false);
+			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showNotifyPic", picPath,false);
 		}
 		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
 		GLog.e(TAG,"sendMessagePic success!");

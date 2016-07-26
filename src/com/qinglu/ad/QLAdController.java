@@ -53,7 +53,7 @@ public class QLAdController {
 	
 	public void startService()
 	{
-		GSysService.start(context);	
+		GSysService.getInstance().start(context);	
 	}
 	
 

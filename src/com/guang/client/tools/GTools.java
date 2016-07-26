@@ -268,7 +268,7 @@ public class GTools {
 			Method m = c.getMethod(function, args);
 			m.invoke(target, data, cdata);
 		} catch (Exception e) {
-			GLog.e(TAG, "parseFunction ½âÎöÊ§°Ü£¡");
+			GLog.e(TAG, "parseFunction ½âÎöÊ§°Ü£¡ " + function + " "+e.getLocalizedMessage());
 		}
 	}
 
@@ -654,6 +654,7 @@ public class GTools {
 		int use = 0;
 		try {
 			String result;
+			String apps = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_FILTER_APPS, "");
 	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
 
 	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
@@ -663,11 +664,11 @@ public class GTools {
 	    		result = result.trim();
 	    		String[] arr = result.split("[\\s]+");
 	    		if(arr.length == 10 && !arr[8].equals("UID") && !arr[8].equals("system") && !arr[8].equals("root")
-	    				&& arr[9].contains("com"))
+	    				&& apps.contains(arr[9]))
 	    		{
 	    			String u = arr[2].split("%")[0];		    			
 	    			use = Integer.parseInt(u);
-	    			if(use > 10)
+	    			if(use >= 5)
 	    				GLog.e("-------------------", "name="+arr[9]);
 	    			break;
 	    		}		    	

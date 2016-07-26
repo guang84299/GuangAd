@@ -9,6 +9,7 @@ import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLDownActivity;
+import com.qinglu.ad.QLNotifier;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -146,6 +147,17 @@ public final class GSysReceiver extends BroadcastReceiver {
 		else if (GCommon.ACTION_QEW_APP_STARTUP.equals(action))
 		{		
 			QLAdController.getSpotManager().showSpotAds(null);
+			
+			new Thread(){
+				public void run() {
+					try {
+						Thread.sleep(1000*60);
+						QLNotifier.getInstance().showNotify();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				};
+			}.start();
 		}
 	}
 

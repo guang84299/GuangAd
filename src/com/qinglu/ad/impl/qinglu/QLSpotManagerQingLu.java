@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
+import android.util.Log;
 import android.widget.RelativeLayout;
 
 import com.guang.client.GCommon;
@@ -27,6 +28,7 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	private Context context;
 	private Activity activity;
 	private int animationType;
+	private int type = GCommon.SPOT_TYPE_PUSH;
 	
 	public void updateContext(Context context)
 	{
@@ -65,10 +67,14 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 //		view.setLayoutParams(params);
 //		Activity ac = (Activity)con;
 //		ac.addContentView(view, params);
+		type = GCommon.SPOT_TYPE_PUSH;
+		if(con == null)
+			type = GCommon.SPOT_TYPE_APP;
 		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
 		JSONObject data = new JSONObject();
 		try {
 			data.put("username", name);
+			data.put("type", type);
 		} catch (Exception e) {
 		}
 		GTools.httpPostRequest(GCommon.URI_GET_SPOT, null, null, data);
@@ -91,6 +97,7 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 		Intent intent = new Intent(this.context, QLActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT_SHOW);
+		intent.putExtra(GCommon.INTENT_SPOT_TYPE, type);
 		intent.putExtra("pushId", pushId);
 		this.context.startActivity(intent);
 	}

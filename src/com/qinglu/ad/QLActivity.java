@@ -57,6 +57,7 @@ public class QLActivity extends Activity {
 		Intent intent = getIntent();
 		String type = intent.getStringExtra(GCommon.INTENT_TYPE);
 		pushId = intent.getStringExtra("pushId");
+		
 		if (GCommon.INTENT_PUSH_MESSAGE.equals(type)) {
 			try {
 				pushDownload();
@@ -64,7 +65,8 @@ public class QLActivity extends Activity {
 				e.printStackTrace();
 			}
 		} else if (GCommon.INTENT_PUSH_SPOT_SHOW.equals(type)) {
-			spot();
+			int spot_type = intent.getIntExtra(GCommon.INTENT_SPOT_TYPE, GCommon.SPOT_TYPE_PUSH);
+			spot(spot_type);
 		}
 		else if (GCommon.INTENT_PUSH_MESSAGE_PIC.equals(type)) {
 			try {
@@ -82,8 +84,8 @@ public class QLActivity extends Activity {
 		}
 	}
 
-	private void spot() {
-		QLSpotView view = new QLSpotView(this, 2, GCommon.SPOT_TYPE_PUSH,
+	private void spot(int spot_type) {
+		QLSpotView view = new QLSpotView(this, 2, spot_type,
 				new MySpotDialogListener());
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.MATCH_PARENT,
