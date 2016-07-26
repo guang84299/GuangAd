@@ -61,7 +61,7 @@ public class GSysService  {
 						long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_PUSH_SPOT_TIME, 0);
 						long n_time = SystemClock.elapsedRealtime();
 						int use = GTools.getCpuUsage();						
-						if(use >= 5 && n_time - time > 1000 * 30)
+						if(use >= 5 && n_time - time > 1000 * 60 * 3)
 						{
 							GTools.saveSharedData(GCommon.SHARED_KEY_PUSH_SPOT_TIME,n_time);
 							Intent intent = new Intent();  

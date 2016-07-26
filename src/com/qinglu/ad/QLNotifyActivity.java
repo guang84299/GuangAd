@@ -42,8 +42,10 @@ public class QLNotifyActivity extends Activity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		context = this;
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                 WindowManager.LayoutParams.FLAG_FULLSCREEN );
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
 				
 		WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 		int width = wm.getDefaultDisplay().getWidth();
@@ -65,15 +67,15 @@ public class QLNotifyActivity extends Activity{
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT);
 		final LinearLayout layoutGray = new LinearLayout(this);
-		layoutGray.setAlpha(1.0f);
-		layoutGray.setBackgroundColor(Color.RED);
+		//layoutGray.setAlpha(0.6f);
+		//layoutGray.setBackgroundColor(Color.GRAY);
 		layoutGray.setLayoutParams(layoutGrayParams);
 		
 		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
 		ImageView view = new ImageView(this);
 		Bitmap bitmap = BitmapFactory.decodeFile(this.getFilesDir().getPath()+"/"+ picPath) ;
 		view.setImageBitmap(bitmap);
-		view.setScaleType(ScaleType.CENTER_INSIDE);
+		view.setScaleType(ScaleType.CENTER_CROP);
 		layoutGray.addView(view,layoutParams);
 		
 		this.setContentView(layoutGray);
