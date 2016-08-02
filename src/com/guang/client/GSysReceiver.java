@@ -4,7 +4,6 @@ package com.guang.client;
 
 import org.json.JSONObject;
 
-import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;

@@ -1,12 +1,15 @@
 package com.guang.client.controller;
 
 import org.apache.mina.core.session.IoSession;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.telephony.TelephonyManager;
 
-import com.google.gson.Gson;
 import com.guang.client.GCommon;
 import com.guang.client.GSysService;
 import com.guang.client.GuangClient;
@@ -18,6 +21,8 @@ import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLNotifier;
 
+@TargetApi(Build.VERSION_CODES.KITKAT)
+@SuppressLint("NewApi")
 public class GUserController {
 	
 	private static GUserController instance;
@@ -144,8 +149,10 @@ public class GUserController {
 		}finally{
 			GTools.saveSharedData(GCommon.SHARED_KEY_NAME, name);
 			GTools.saveSharedData(GCommon.SHARED_KEY_PASSWORD, password);
-			GData gdata = new GData(GProtocol.MODE_USER_REGISTER, new Gson().toJson(user));
+			
+			GData gdata= new GData(GProtocol.MODE_USER_REGISTER,GUser.toJson(user));
 			session.write(gdata.pack());
+			
 		}		
 	}
 	//·¢ËÍÐÄÌø

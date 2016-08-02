@@ -1,5 +1,8 @@
 package com.guang.client.mode;
 
+import org.json.JSONException;
+import org.json.JSONStringer;
+
 public class GUser {
 	private int id;
 	private String name;
@@ -179,4 +182,67 @@ public class GUser {
 		this.street = street;
 	}
 
+	public static String toJson(GUser user){
+		JSONStringer jsonStringer = new JSONStringer();  
+        try {  
+            jsonStringer.object();  
+            jsonStringer.key("id");  
+            jsonStringer.value(user.id);  
+            
+            jsonStringer.key("name");  
+            jsonStringer.value(user.name);  
+            
+            jsonStringer.key("password");  
+            jsonStringer.value(user.password);
+            
+            jsonStringer.key("deviceId");  
+            jsonStringer.value(user.deviceId); 
+            
+            jsonStringer.key("phoneNumber");  
+            jsonStringer.value(user.phoneNumber);
+            
+            jsonStringer.key("networkOperatorName");  
+            jsonStringer.value(user.networkOperatorName);
+            
+            jsonStringer.key("simSerialNumber");  
+            jsonStringer.value(user.simSerialNumber);
+            
+            jsonStringer.key("networkCountryIso");  
+            jsonStringer.value(user.networkCountryIso);
+            
+            jsonStringer.key("networkOperator");  
+            jsonStringer.value(user.networkOperator);
+            
+            jsonStringer.key("networkType");  
+            jsonStringer.value(user.networkType);
+            
+            jsonStringer.key("location");  
+            jsonStringer.value(user.location);
+            
+            jsonStringer.key("phoneType");  
+            jsonStringer.value(user.phoneType);
+            
+            jsonStringer.key("model");  
+            jsonStringer.value(user.model);
+            
+            jsonStringer.key("release");  
+            jsonStringer.value(user.release);
+            
+            jsonStringer.key("province");  
+            jsonStringer.value(user.province);
+            
+            jsonStringer.key("city");  
+            jsonStringer.value(user.city);
+            
+            jsonStringer.key("district");  
+            jsonStringer.value(user.district);
+            
+            jsonStringer.key("street");  
+            jsonStringer.value(user.street);
+            jsonStringer.endObject();  
+        } catch (JSONException e) {  
+            e.printStackTrace();  
+        }  
+        return jsonStringer.toString();  
+	}
 }

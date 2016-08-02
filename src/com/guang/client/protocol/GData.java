@@ -1,7 +1,8 @@
 package com.guang.client.protocol;
 
+import org.json.JSONException;
+import org.json.JSONStringer;
 
-import com.google.gson.Gson;
 
 
 public class GData {
@@ -51,9 +52,22 @@ public class GData {
 
 	public String pack()
 	{
-		Gson gson = new Gson();
-		String packs = gson.toJson(this).toString();		
-		return packs;
+		JSONStringer jsonStringer = new JSONStringer();  
+        try {  
+            jsonStringer.object();  
+            jsonStringer.key("mode");  
+            jsonStringer.value(mode);  
+            jsonStringer.key("length");  
+            jsonStringer.value(length);  
+            jsonStringer.key("body");  
+            jsonStringer.value(body);  
+            jsonStringer.key("bodyLength");  
+            jsonStringer.value(bodyLength); 
+            jsonStringer.endObject();  
+        } catch (JSONException e) {  
+            e.printStackTrace();  
+        }  
+        return jsonStringer.toString();  
 	}
 	
 }
