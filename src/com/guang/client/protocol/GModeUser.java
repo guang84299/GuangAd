@@ -116,7 +116,7 @@ public class GModeUser {
 			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath,true);
 		}	
 		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
-		GLog.e(TAG,"sendMessage success!");
+		GLog.e(TAG,"sendMessage success! order=" + order);
 	}
 	
 	public static void sendMessagePicResult(IoSession session, String data)

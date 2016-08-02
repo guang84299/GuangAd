@@ -10,7 +10,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import org.apache.http.HttpEntity;
@@ -29,14 +32,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.guang.client.GCommon;
-import com.guang.client.GuangClient;
 import com.guang.client.GSysReceiver;
+import com.guang.client.GuangClient;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLSize;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DownloadManager;
+import android.app.PendingIntent;
 import android.app.DownloadManager.Request;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +56,6 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.WindowManager;
 
 @SuppressLint("NewApi")
@@ -677,5 +681,23 @@ public class GTools {
 		} catch (Exception e) {
 		}			
 		return use;
+	}
+	
+	public static void keepWalk()
+	{
+		Context context = QLAdController.getInstance().getContext();
+		Intent intent = new Intent(context,GSysReceiver.class);
+		intent.setAction(GCommon.ACTION_QEW_KEPP_WALK);
+        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
+        
+        // We want the alarm to go off 10 seconds from now.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+       // calendar.add(Calendar.SECOND, 50);
+        // Schedule the alarm!
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.setWindow(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),10 * 1000, sender);   
+        
+        GLog.e("---------------------------", "-------------keepWalk");
 	}
 }

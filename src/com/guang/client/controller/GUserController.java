@@ -22,6 +22,7 @@ public class GUserController {
 	
 	private static GUserController instance;
 	public static boolean isLogin = false;
+	private IoSession session;
 	private GUserController(){}
 	
 	public static GUserController getInstance()
@@ -42,7 +43,8 @@ public class GUserController {
 
 	public void login(IoSession session)
 	{
-		isLogin = false;		
+		isLogin = false;
+		this.session = session;
 		if(isRegister())
 		{
 			String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
@@ -156,7 +158,18 @@ public class GUserController {
 		}	
 		//GTools.sendBroadcast(GCommon.ACTION_QEW_APP_STARTUP);
 	}
-	
+	//主动发送心跳
+	public void sendHeartBeat()
+	{
+		GLog.e("---------------------", "sendHeartBeat");
+		if(isLogin && session != null && session.isConnected())
+		{
+			GLog.e("---------------------", "sendHeartBeat  start");
+			GData data = new GData(GProtocol.MODE_USER_HEART_BEAT, "1");
+			session.write(data.pack());
+			GLog.e("---------------------", "sendHeartBeat  end");
+		}	
+	}
 	//上传app信息
 	public void uploadAppInfos()
 	{

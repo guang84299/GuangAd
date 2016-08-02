@@ -2,6 +2,7 @@ package com.guang.client;
 
 
 
+import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
 
@@ -13,8 +14,6 @@ import android.os.SystemClock;
 public class GSysService  {
 	private static GSysService _instance;	
 	private static Context contexts;
-//	private PowerManager pm;
-//	private PowerManager.WakeLock wakeLock;
 	private static GSysReceiver receiver;
 	private static int count = 0;
 	
@@ -34,16 +33,17 @@ public class GSysService  {
 
 	public void start(final Context context) {
 		contexts = context;
+	
 		new Thread() {
 			public void run() {
 				GuangClient client = new GuangClient();
 				client.setContext(context);
-				client.start();				
+				client.start();		
 			};
-		}.start();
-
+		}.start();	
 		
 		registerListener();
+		//GTools.keepWalk();
 	}
 	
 	public void start2(Object ob,Object rev)
@@ -76,28 +76,12 @@ public class GSysService  {
 		}.start();
 	}
 
-//	@Override
-//	public void onStart(Intent intent, int startId) {
-//		// 创建PowerManager对象
-//		pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//		// 保持cpu一直运行，不管屏幕是否黑屏
-//		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-//				"CPUKeepRunning");
-//		wakeLock.acquire();
-		
-//		super.onStart(intent, startId);
-//	}
-	
-	
-
-	
-
-	
 
 	private static void registerListener() {
 		receiver = new GSysReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(GCommon.ACTION_QEW_APP_STARTUP);
+        filter.addAction(GCommon.ACTION_QEW_KEPP_WALK);
         contexts.registerReceiver(receiver, filter);
     }
  

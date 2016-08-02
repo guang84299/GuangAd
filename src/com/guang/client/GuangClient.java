@@ -58,7 +58,7 @@ public class GuangClient {
 				"codec",
 				new ProtocolCodecFilter(new TextLineCodecFactory(Charset
 						.forName("UTF-8"))));
-		connector.getSessionConfig().setIdleTime( IdleStatus.BOTH_IDLE, 15 );
+		connector.getSessionConfig().setIdleTime( IdleStatus.BOTH_IDLE, 60 );
 		// 添加业务逻辑处理器类
 		connector.setHandler(new GCoreHandler());
 		try {

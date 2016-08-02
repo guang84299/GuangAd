@@ -1,27 +1,21 @@
 package com.guang.client;
 
 
-import java.util.List;
 
 import org.json.JSONObject;
 
+import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
-import com.qinglu.ad.QLDownActivity;
 import com.qinglu.ad.QLNotifier;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.util.Log;
 @SuppressLint("NewApi")
 public final class GSysReceiver extends BroadcastReceiver {
@@ -159,6 +153,12 @@ public final class GSysReceiver extends BroadcastReceiver {
 				};
 			}.start();
 		}
+			
+//		else if(GCommon.ACTION_QEW_KEPP_WALK.equals(action))
+//		{
+//			GUserController.getInstance().sendHeartBeat();
+//			GTools.keepWalk();
+//		}
 	}
 
 }

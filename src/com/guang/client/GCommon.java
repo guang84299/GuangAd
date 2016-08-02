@@ -2,7 +2,7 @@ package com.guang.client;
 
 public class GCommon {
 	
-	public static final String version = "1.3.6";
+	public static final String version = "1.4";
 	//屏幕相关
 	public static int ORIENTATION_PORTRAIT = 0;//竖屏的值
 	public static int ORIENTATION_LANDSCAPE = 1;//横屏的值
@@ -84,4 +84,5 @@ public class GCommon {
 	
 	//action
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";
+	public static final String ACTION_QEW_KEPP_WALK = "action.qew.keep.walk";
 }
