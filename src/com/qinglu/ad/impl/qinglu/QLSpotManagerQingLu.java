@@ -4,23 +4,15 @@ package com.qinglu.ad.impl.qinglu;
 
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
-import android.util.Log;
-import android.widget.RelativeLayout;
 
 import com.guang.client.GCommon;
-import com.guang.client.tools.GLog;
-import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLActivity;
 import com.qinglu.ad.QLSpotManager;
-import com.qinglu.ad.QLSpotView;
 import com.qinglu.ad.listener.QLSpotDialogListener;
 
 
@@ -28,7 +20,6 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	private Context context;
 	private Activity activity;
 	private int animationType;
-	private int type = GCommon.SPOT_TYPE_PUSH;
 	
 	public void updateContext(Context context)
 	{
@@ -38,7 +29,7 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	public QLSpotManagerQingLu(Context context)
 	{
 		this.context = context;		
-		this.animationType = GCommon.ANIM_ADVANCE;		
+		//this.animationType = GCommon.ANIM_ADVANCE;		
 	}
 	@Override
 	public void loadSpotAds() {
@@ -61,46 +52,17 @@ public class QLSpotManagerQingLu implements QLSpotManager{
 	@SuppressLint("NewApi")
 	@Override
 	public void showSpotAds(final Context con) {
-//		QLSpotView view = new QLSpotView(con,this.animationType);
-//		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,RelativeLayout.LayoutParams.MATCH_PARENT);
-//		//params.gravity = Gravity.CENTER;
-//		view.setLayoutParams(params);
-//		Activity ac = (Activity)con;
-//		ac.addContentView(view, params);
-		type = GCommon.SPOT_TYPE_PUSH;
-		if(con == null)
-			type = GCommon.SPOT_TYPE_APP;
-		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
-		JSONObject data = new JSONObject();
-		try {
-			data.put("username", name);
-			data.put("type", type);
-		} catch (Exception e) {
-		}
-		GTools.httpPostRequest(GCommon.URI_GET_SPOT, null, null, data);
-	}
-	
-
-	public void showSpotAd(Object obj,Object rev)
-	{
 		if(this.activity != null)
 		{
 			this.activity.finish();
 			this.activity = null;
 		}
-		String pushId = "";
-		try {
-			pushId = GTools.getPushShareData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, -1).getString("pushId");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 		Intent intent = new Intent(this.context, QLActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_PUSH_SPOT_SHOW);
-		intent.putExtra(GCommon.INTENT_SPOT_TYPE, type);
-		intent.putExtra("pushId", pushId);
+		intent.putExtra(GCommon.INTENT_TYPE, GCommon.INTENT_OPEN_SPOT);
 		this.context.startActivity(intent);
 	}
+	
 	
 	@Override
 	public void showSpotAds(Context con, QLSpotDialogListener spotDialogListener) {

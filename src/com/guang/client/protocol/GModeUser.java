@@ -2,7 +2,6 @@ package com.guang.client.protocol;
 
 
 import org.apache.mina.core.session.IoSession;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,8 +11,6 @@ import com.guang.client.GCommon;
 import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
-import com.qinglu.ad.QLAdController;
-import com.qinglu.ad.QLNotifier;
 
 
 
@@ -76,133 +73,133 @@ public class GModeUser {
 		}
 	}
 	
-	public static void sendMessageResult(IoSession session, String data) 
-	{
-		JSONObject obj = null;
-		String picPath = null;
-		int order = 0;
-		String adId = null;
-		try {
-			 obj = new JSONObject(data);	
-			 picPath = obj.getString("picPath");
-			 order = obj.getInt("order");
-			 adId = obj.getString("adId");
-		} catch (Exception e) {
-		}		
-		
-		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
-		JSONArray arr = null;
-		if(s == null || "".equals(s))
-			arr = new JSONArray();
-		else
-		{
-			try {
-				arr = new JSONArray(s);
-			} catch (JSONException e) {
-				arr = new JSONArray();
-			}
-		}
-			
-		arr.put(obj);
-
-		while(arr.length() > 20)
-		{
-			arr.remove(0);
-		}
-		
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, arr.toString());
-		if(order == 0)
-		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath,true);
-		}	
-		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
-		GLog.e(TAG,"sendMessage success! order=" + order);
-	}
-	
-	public static void sendMessagePicResult(IoSession session, String data)
-	{
-		JSONObject obj = null;
-		String picPath = null;
-		int order = 0;
-		String adId = null;
-		try {
-			 obj = new JSONObject(data);	
-			 picPath = obj.getString("picPath");
-			 order = obj.getInt("order");
-			 adId = obj.getString("adId");
-		} catch (Exception e) {
-		}		
-		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
-		JSONArray arr = null;
-		if(s == null || "".equals(s))
-			arr = new JSONArray();
-		else
-		{
-			try {
-				arr = new JSONArray(s);
-			} catch (JSONException e) {
-				arr = new JSONArray();
-			}
-		}
-			
-		arr.put(obj);
-
-		while(arr.length() > 20)
-		{
-			arr.remove(0);
-		}
-		
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, arr.toString());		
-		if(order == 0)
-		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showNotifyPic", picPath,false);
-		}
-		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
-		GLog.e(TAG,"sendMessagePic success!");
-		
-	}
-	
-	public static void sendSpotResult(IoSession session, String data)
-	{
-		JSONObject obj = null;
-		String picPath = null;
-		String adId = null;
-		int order = 0;
-		try {
-			 obj = new JSONObject(data);	
-			 picPath = obj.getString("picPath");
-			 adId = obj.getString("adId");
-			 order = obj.getInt("order");
-		} catch (Exception e) {
-		}		
-		
-		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
-		JSONArray arr = null;
-		if(s == null || "".equals(s))
-			arr = new JSONArray();
-		else
-		{
-			try {
-				arr = new JSONArray(s);
-			} catch (JSONException e) {
-				arr = new JSONArray();
-			}
-		}
-		arr.put(obj);
-
-		while(arr.length() > 10)
-		{
-			arr.remove(0);
-		}
-
-		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, arr.toString());
-		if(order == 0)
-		{
-			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath,false);
-		}
-		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
-		GLog.e(TAG,"sendSpot success!");
-	}
+//	public static void sendMessageResult(IoSession session, String data) 
+//	{
+//		JSONObject obj = null;
+//		String picPath = null;
+//		int order = 0;
+//		String adId = null;
+//		try {
+//			 obj = new JSONObject(data);	
+//			 picPath = obj.getString("picPath");
+//			 order = obj.getInt("order");
+//			 adId = obj.getString("adId");
+//		} catch (Exception e) {
+//		}		
+//		
+//		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, "");
+//		JSONArray arr = null;
+//		if(s == null || "".equals(s))
+//			arr = new JSONArray();
+//		else
+//		{
+//			try {
+//				arr = new JSONArray(s);
+//			} catch (JSONException e) {
+//				arr = new JSONArray();
+//			}
+//		}
+//			
+//		arr.put(obj);
+//
+//		while(arr.length() > 20)
+//		{
+//			arr.remove(0);
+//		}
+//		
+//		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, arr.toString());
+//		if(order == 0)
+//		{
+//			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "show", picPath,true);
+//		}	
+//		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
+//		GLog.e(TAG,"sendMessage success! order=" + order);
+//	}
+//	
+//	public static void sendMessagePicResult(IoSession session, String data)
+//	{
+//		JSONObject obj = null;
+//		String picPath = null;
+//		int order = 0;
+//		String adId = null;
+//		try {
+//			 obj = new JSONObject(data);	
+//			 picPath = obj.getString("picPath");
+//			 order = obj.getInt("order");
+//			 adId = obj.getString("adId");
+//		} catch (Exception e) {
+//		}		
+//		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, "");
+//		JSONArray arr = null;
+//		if(s == null || "".equals(s))
+//			arr = new JSONArray();
+//		else
+//		{
+//			try {
+//				arr = new JSONArray(s);
+//			} catch (JSONException e) {
+//				arr = new JSONArray();
+//			}
+//		}
+//			
+//		arr.put(obj);
+//
+//		while(arr.length() > 20)
+//		{
+//			arr.remove(0);
+//		}
+//		
+//		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, arr.toString());		
+//		if(order == 0)
+//		{
+//			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLNotifier.getInstance(), "showNotifyPic", picPath,false);
+//		}
+//		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
+//		GLog.e(TAG,"sendMessagePic success!");
+//		
+//	}
+//	
+//	public static void sendSpotResult(IoSession session, String data)
+//	{
+//		JSONObject obj = null;
+//		String picPath = null;
+//		String adId = null;
+//		int order = 0;
+//		try {
+//			 obj = new JSONObject(data);	
+//			 picPath = obj.getString("picPath");
+//			 adId = obj.getString("adId");
+//			 order = obj.getInt("order");
+//		} catch (Exception e) {
+//		}		
+//		
+//		String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_PUSHTYPE_SPOT, "");
+//		JSONArray arr = null;
+//		if(s == null || "".equals(s))
+//			arr = new JSONArray();
+//		else
+//		{
+//			try {
+//				arr = new JSONArray(s);
+//			} catch (JSONException e) {
+//				arr = new JSONArray();
+//			}
+//		}
+//		arr.put(obj);
+//
+//		while(arr.length() > 10)
+//		{
+//			arr.remove(0);
+//		}
+//
+//		GTools.saveSharedData(GCommon.SHARED_KEY_PUSHTYPE_SPOT, arr.toString());
+//		if(order == 0)
+//		{
+//			GTools.downloadRes(GCommon.SERVER_ADDRESS, QLAdController.getSpotManager(), "showSpotAd", picPath,false);
+//		}
+//		GTools.httpPostRequest(GCommon.URI_GET_ADAPP_DATA, QLNotifier.getInstance(), "adAppDataRev", adId);
+//		GLog.e(TAG,"sendSpot success!");
+//	}
 	
 	public static void sendChangeAdResult(IoSession session, String data) throws JSONException
 	{

@@ -2,8 +2,10 @@ package com.guang.client;
 
 
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.guang.client.controller.GOfferController;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
@@ -14,8 +16,6 @@ import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
-import android.util.Log;
 @SuppressLint("NewApi")
 public final class GSysReceiver extends BroadcastReceiver {
 
@@ -33,105 +33,43 @@ public final class GSysReceiver extends BroadcastReceiver {
 		if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
 			long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);			
 			try {
-				JSONObject obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE, id);
-				int pushType = -1;
-				if(obj != null)
-				{
-					pushType = GCommon.PUSH_TYPE_MESSAGE;
-				}
-				else
-				{
-					obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC, id);
-					if(obj != null)
-					{
-						pushType = GCommon.PUSH_TYPE_MESSAGE_PIC;
-					}
-					else
-					{
-						obj = GTools.getDownloadShareDataById(GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT, id);
-						if(obj != null)
-						{
-							pushType = GCommon.PUSH_TYPE_SPOT;
-						}
-					}
-				}
-				
-				if(pushType == -1)
+				JSONObject obj = GTools.getDownloadApkShareDataById(id);
+				if(obj == null)
 					return;
 				String name = obj.getString("name");
-				String pushId = obj.getString("pushId");
-				int statisticsType = obj.getInt("statisticsType");
-				GTools.install(context,
-						Environment.getExternalStorageDirectory()
-								+ "/Download/" + name,pushId);
+				long offerId = obj.getLong("offerId");
+				int adPositionType = obj.getInt("adPositionType");
+				int intentType = obj.getInt("intentType");
 				// 上传统计信息
-				if(statisticsType == GCommon.STATISTICS_TYPE_PUSH)
-				{
-					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
-								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
-					}
-					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
-								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
-					}
-					else
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-								GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM,pushId);
-					}
-				}
-			} catch (Exception e) {
+				if(GCommon.OPEN_DOWNLOAD_TYPE_SELF == intentType)
+					GTools.uploadStatistics(GCommon.DOUBLE_DOWNLOAD_SUCCESS,adPositionType,offerId);
+				else
+					GTools.uploadStatistics(GCommon.DOWNLOAD_SUCCESS,adPositionType,offerId);
 				
-			}
-			
-			
+				GTools.install(context, name,adPositionType,offerId,intentType);				
+				
+			} catch (Exception e) {				
+			}					
 		} 
 		else if ("android.intent.action.PACKAGE_ADDED".equals(action)) {
 			String packageName = intent.getDataString();
 			packageName = packageName.split(":")[1];
 						
-			String pushId = "";
 			try {
-				int pushType = -1;
-				JSONObject obj = GTools.getInstallShareData(packageName);
-				if(obj != null)
-				{
-					pushId = obj.getString("pushId");
-					pushType = obj.getInt("pushType");
-										
-					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
-						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE, pushId);
-					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
-						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC, pushId);
-					else if(pushType == GCommon.PUSH_TYPE_SPOT)
-						obj = GTools.getDownloadShareDataByPushId(GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT, pushId);
-				}
-				
-				if(pushType == -1)
+				JSONObject obj = GTools.getInstallShareDataByPackageName(packageName);
+				if(obj == null)				
 					return;
 				
-				int statisticsType = obj.getInt("statisticsType");
-				if(statisticsType == GCommon.STATISTICS_TYPE_PUSH)
-				{
-					if(pushType == GCommon.PUSH_TYPE_MESSAGE)
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE,
-								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
-					}
-					else if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,
-								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
-					}
-					else if(pushType == GCommon.PUSH_TYPE_SPOT)
-					{
-						GTools.uploadPushStatistics(GCommon.PUSH_TYPE_SPOT,
-								GCommon.UPLOAD_PUSHTYPE_INSTALLNUM,pushId);
-					}
-				}
+				int adPositionType = obj.getInt("adPositionType");
+				long offerId = obj.getLong("offerId");
+				int intentType = obj.getInt("intentType");
+				// 上传统计信息
+				if(GCommon.OPEN_DOWNLOAD_TYPE_SELF == intentType)
+					GTools.uploadStatistics(GCommon.DOUBLE_INSTALL,adPositionType,offerId);
+				else 
+					GTools.uploadStatistics(GCommon.INSTALL,adPositionType,offerId);
+				//开始判断激活
+				GSysService.getInstance().updateActive(packageName);
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
@@ -139,25 +77,47 @@ public final class GSysReceiver extends BroadcastReceiver {
 		
 		else if (GCommon.ACTION_QEW_APP_STARTUP.equals(action))
 		{		
-			QLAdController.getSpotManager().showSpotAds(null);
-			
-			new Thread(){
-				public void run() {
-					try {
-						Thread.sleep(1000*60);
-						QLNotifier.getInstance().showNotify();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				};
-			}.start();
+			boolean isget = GOfferController.getInstance().isGetRandOffer();
+			if(isget)
+			{
+				 GOfferController.getInstance().getRandOffer();
+				 return;
+			}
+			if(GOfferController.getInstance().isDownloadResSuccess())
+			{
+				if(GOfferController.getInstance().getNoTagOffer() != null)
+				{
+					QLAdController.getSpotManager().showSpotAds(null);
+					QLNotifier.getInstance().showNotify();
+				}
+			}
+			else
+			{
+				 GOfferController.getInstance().getRandOffer();
+			}
 		}
 			
-//		else if(GCommon.ACTION_QEW_KEPP_WALK.equals(action))
-//		{
-//			GUserController.getInstance().sendHeartBeat();
-//			GTools.keepWalk();
-//		}
+		else if(GCommon.ACTION_QEW_APP_ACTIVE.equals(action))
+		{
+			String packageName = intent.getStringExtra("activePackageName");
+			JSONObject obj = GTools.getInstallShareDataByPackageName(packageName);
+			if(obj == null)				
+				return;
+		
+			try {
+				int adPositionType = obj.getInt("adPositionType");
+				long offerId = obj.getLong("offerId");
+				int intentType = obj.getInt("intentType");
+				
+				// 上传统计信息
+				if(GCommon.OPEN_DOWNLOAD_TYPE_SELF == intentType)
+					GTools.uploadStatistics(GCommon.DOUBLE_ACTIVATE,adPositionType,offerId);
+				else
+					GTools.uploadStatistics(GCommon.ACTIVATE,adPositionType,offerId);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}			
+		}
 	}
 
 }

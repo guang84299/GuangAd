@@ -2,7 +2,7 @@ package com.qinglu.ad;
 
 import java.util.LinkedList;
 import java.util.Queue;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
+@SuppressLint("DrawAllocation")
 public class QLHorizontalListView extends AdapterView<ListAdapter> {  
 	
     //list?????
@@ -126,7 +127,7 @@ public class QLHorizontalListView extends AdapterView<ListAdapter> {
     private void addAndMeasureChild(final View child, int viewPos) {  
         LayoutParams params = child.getLayoutParams();  
         if(params == null) {  
-            params = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);  
+            params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);  
         }  
   
         addViewInLayout(child, viewPos, params, true);  

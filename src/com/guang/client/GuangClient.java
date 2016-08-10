@@ -23,9 +23,17 @@ public class GuangClient {
 	private static IoConnector connector;
 	private static IoSession session;
 	private static Context context;
+	private static GuangClient _instance;
 
-	public GuangClient() {
+	private GuangClient() {
 		connector = new NioSocketConnector();
+	}
+	
+	public static GuangClient getInstance()
+	{
+		if(_instance == null)
+			_instance = new GuangClient();
+		return _instance;
 	}
 
 	public static IoConnector getConnector() {

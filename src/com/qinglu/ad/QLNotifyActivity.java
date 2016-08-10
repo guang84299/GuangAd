@@ -1,7 +1,11 @@
 package com.qinglu.ad;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.guang.client.GCommon;
+import com.guang.client.controller.GOfferController;
 import com.guang.client.tools.GTools;
 
 import android.annotation.SuppressLint;
@@ -11,14 +15,20 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -37,6 +47,7 @@ public class QLNotifyActivity extends Activity{
 		return super.onKeyDown(keyCode, event);
 		
 	}
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,67 +56,126 @@ public class QLNotifyActivity extends Activity{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN,
                  WindowManager.LayoutParams.FLAG_FULLSCREEN );
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-				
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+		
 		WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 		int width = wm.getDefaultDisplay().getWidth();
 		int height = wm.getDefaultDisplay().getHeight();
 		
+		int title_h = 0;
+		int resourceId = getResources().getIdentifier("status_bar_height",
+				"dimen", "android");
+		if (resourceId > 0) {
+			title_h = getResources().getDimensionPixelSize(resourceId);
+		}
+		
+		final int l_height = GTools.dip2px(50);
+		
 		final LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值    
-		p.width = width;  
-		p.height = (int) (height*0.1);    
+		//p.width = width-50;  
+		p.height = l_height;    
         p.x = 0;
-        p.y = -height/2;
+        p.y = -height/2 + l_height/2 + title_h;
         getWindow().setAttributes(p); 
+        
+		
                 
         Intent intent = getIntent();
-		final String type = intent.getStringExtra(GCommon.INTENT_TYPE);
-		final String pushId = intent.getStringExtra("pushId");
-		String picPath = intent.getStringExtra("picPath");
+        final long offerId = intent.getLongExtra("offerId", 0l);
+        JSONObject obj =  GOfferController.getInstance().getOfferById(offerId);
+        String bannerPicPath = null;
+		try {
+			//long offerId = obj.getLong("id");
+			bannerPicPath = obj.getString("bannerPicPath");
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+		}
 		
-        LinearLayout.LayoutParams layoutGrayParams = new LinearLayout.LayoutParams(
+		RelativeLayout.LayoutParams layoutGrayParams = new RelativeLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT);
-		final LinearLayout layoutGray = new LinearLayout(this);
-		//layoutGray.setAlpha(0.6f);
-		//layoutGray.setBackgroundColor(Color.GRAY);
+		layoutGrayParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+		final RelativeLayout layoutGray = new RelativeLayout(this);
 		layoutGray.setLayoutParams(layoutGrayParams);
 		
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-		ImageView view = new ImageView(this);
-		Bitmap bitmap = BitmapFactory.decodeFile(this.getFilesDir().getPath()+"/"+ picPath) ;
+		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, l_height);
+		final ImageView view = new ImageView(this);
+		Bitmap bitmap = BitmapFactory.decodeFile(this.getFilesDir().getPath()+"/"+ bannerPicPath) ;
 		view.setImageBitmap(bitmap);
 		view.setScaleType(ScaleType.CENTER_CROP);
 		layoutGray.addView(view,layoutParams);
 		
 		this.setContentView(layoutGray);
-		overridePendingTransition((Integer)GTools.getResourceId("qew_slide_in_top", "anim"), 
-				(Integer)GTools.getResourceId("qew_slide_out_top", "anim"));
-		
+						
+		AnimationSet animationSet = new AnimationSet(true);
+         TranslateAnimation translateAnimation =
+            new TranslateAnimation(
+            		Animation.RELATIVE_TO_SELF,0.0f,
+            		Animation.RELATIVE_TO_SELF,0f,
+	                Animation.RELATIVE_TO_SELF,-l_height,
+	                Animation.RELATIVE_TO_SELF,0f);
+         translateAnimation.setDuration(1000);
+         animationSet.addAnimation(translateAnimation);
+         animationSet.setAnimationListener(new AnimationListener() {					
+				@Override
+				public void onAnimationEnd(Animation animation) {
+					GTools.uploadStatistics(GCommon.SHOW,GCommon.BANNER,offerId);
+					GOfferController.getInstance().setOfferTag(offerId);					
+				}
+				@Override
+				public void onAnimationStart(Animation animation) {}
+				@Override
+				public void onAnimationRepeat(Animation animation) {}
+			});
+         view.startAnimation(animationSet);
+
 		 //上传统计信息
-		GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pushId);
+		//GTools.uploadPushStatistics(GCommon.PUSH_TYPE_MESSAGE_PIC,GCommon.UPLOAD_PUSHTYPE_SHOWNUM,pushId);
 		
 		view.setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(context,QLDownActivity.class);
-				intent.putExtra(GCommon.INTENT_TYPE, type);
-				intent.putExtra("pushId", pushId);
-				context.startActivity(intent);
-				
-				context.finish();
+				AnimationSet animationSet = new AnimationSet(true);
+		         TranslateAnimation translateAnimation =
+		            new TranslateAnimation(
+		            		Animation.RELATIVE_TO_SELF,0.0f,
+		            		Animation.RELATIVE_TO_SELF,0f,
+			                Animation.RELATIVE_TO_SELF,0f,
+			                Animation.RELATIVE_TO_SELF,-l_height);
+		         translateAnimation.setDuration(1000);
+		         animationSet.addAnimation(translateAnimation);
+		         animationSet.setAnimationListener(new AnimationListener() {					
+					@Override
+					public void onAnimationEnd(Animation animation) {
+						GTools.uploadStatistics(GCommon.CLICK,GCommon.BANNER,offerId);
+						Intent intent = new Intent(context,QLDownActivity.class);
+						intent.putExtra(GCommon.INTENT_OPEN_DOWNLOAD, GCommon.OPEN_DOWNLOAD_TYPE_OTHER);
+						intent.putExtra(GCommon.AD_POSITION_TYPE, GCommon.BANNER);
+						intent.putExtra("offerId",offerId);
+						context.startActivity(intent);
+		
+						context.finish();						
+					}
+					@Override
+					public void onAnimationStart(Animation animation) {}
+					@Override
+					public void onAnimationRepeat(Animation animation) {}
+				});
+		        view.startAnimation(animationSet);
 			}
 		});
 		
 		new Thread(){
 			public void run() {
 				try {
-					Thread.sleep(1000*60*2);
+					Thread.sleep(1000*10);
 					context.finish();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			};
 		}.start();
+		
+		
 	}
 }

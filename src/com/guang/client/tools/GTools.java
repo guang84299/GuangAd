@@ -10,10 +10,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import org.apache.http.HttpEntity;
@@ -32,16 +29,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.guang.client.GCommon;
-import com.guang.client.GSysReceiver;
 import com.guang.client.GuangClient;
+import com.guang.client.controller.GOfferController;
 import com.qinglu.ad.QLAdController;
 import com.qinglu.ad.QLSize;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.DownloadManager;
-import android.app.PendingIntent;
 import android.app.DownloadManager.Request;
 import android.content.Context;
 import android.content.Intent;
@@ -55,6 +50,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.view.WindowManager;
 
@@ -190,63 +186,8 @@ public class GTools {
 		return context.getPackageName();
 	}
 	
-	// 安装一个应用
-	public static void install(Context context, String apkUrl,String pushId) {		
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(new File(apkUrl)),
-				"application/vnd.android.package-archive");
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		
-		String key = GCommon.SHARED_KEY_PUSHTYPE_MESSAGE;
-		int pushType = GCommon.PUSH_TYPE_MESSAGE;
-		JSONObject obj = getPushShareDataByPushId(key, pushId);
-		if(obj == null)
-		{		
-			key = GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC;
-			pushType = GCommon.PUSH_TYPE_MESSAGE_PIC;
-			obj = getPushShareDataByPushId(key, pushId);	
-			if(obj == null)
-			{		
-				key = GCommon.SHARED_KEY_PUSHTYPE_SPOT;
-				pushType = GCommon.PUSH_TYPE_SPOT;
-				obj = getPushShareDataByPushId(key, pushId);	
-				if(obj == null)
-				{
-					return;
-				}			
-			}			
-		}		
-		String s = getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_AD, "");
-		JSONArray arr = null;
-		if(s == null || "".equals(s))
-			arr = new JSONArray();
-		else
-		{
-			try {
-				arr = new JSONArray(s);
-			} catch (JSONException e) {
-				arr = new JSONArray();
-			}
-		}
-		JSONObject obj2 = new JSONObject();
-		try {
-			obj2.put("pushId", pushId);
-			obj2.put("packageName", obj.getString("packageName"));
-			obj2.put("pushType", pushType);
-		} catch (Exception e) {
-		}
-		arr.put(obj2);
-
-		while(arr.length() > 10)
-		{
-			arr.remove(0);
-		}
-		
-		saveSharedData(GCommon.SHARED_KEY_INSTALL_AD, arr.toString());
-		context.startActivity(intent);
-	}
-	
 	// 获取屏幕宽高
+	@SuppressWarnings("deprecation")
 	public static QLSize getScreenSize(Context context) {
 		WindowManager wm = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
@@ -423,11 +364,28 @@ public class GTools {
 	        String uuidRaw = UUID.randomUUID().toString();
 	        return uuidRaw.replaceAll("-", "");
 	    }
+	//获取范围随机数
+	public static int getRand(int start, int end) {
+		int num = (int) (Math.random() * end);
+		if (num < start)
+			num = start;
+		else if (num >= start && num <= end)
+			return num;
+		else {
+			num = num + start;
+			if (num > end)
+				num = end;
+		}
+		return num;
+	}
 	
-	// 下载apk文件 type: 1:广告统计 2:推送统计  adType: 1:push messqge 2:push spot
+	// 下载apk文件 adPositionType 广告类型 intentType:打开下载界面的类型，主要用来统计二次数据
 	@SuppressLint("NewApi")
-	public static void downloadApk(String fileUri,int statisticsType, int pushType,String pushId) {
+	public static void downloadApk(String fileUri,int adPositionType, long offerId,int intentType) {
 		final Context context = GuangClient.getContext();
+		
+		File folder = Environment.getExternalStoragePublicDirectory("Download");
+		if(!folder.exists() && folder.isDirectory()) folder.mkdirs();
 		
 		DownloadManager downloadManager = (DownloadManager) context
 				.getSystemService(Context.DOWNLOAD_SERVICE);
@@ -441,23 +399,17 @@ public class GTools {
 		request.setNotificationVisibility(Request.VISIBILITY_HIDDEN);
 		String name = getRandomUUID() + ".apk";
 
-		request.setDestinationInExternalPublicDir("/download/", name);
+		request.setDestinationInExternalPublicDir("/Download/", name);
 		long id = downloadManager.enqueue(request);
 		try {
 			JSONObject obj = new JSONObject();
 			obj.put("id", id);
-			obj.put("statisticsType", statisticsType);
-			obj.put("pushType", pushType);
+			obj.put("adPositionType", adPositionType);
+			obj.put("offerId", offerId);	
 			obj.put("name", name);
-			obj.put("pushId", pushId);
+			obj.put("intentType", intentType);
 			
-			String key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE;
-			if(pushType == GCommon.PUSH_TYPE_MESSAGE_PIC)
-				key = GCommon.SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC;
-			else if(pushType == GCommon.PUSH_TYPE_SPOT)
-				key = GCommon.SHARED_KEY_DOWNLOAD_AD_SPOT;
-			
-			String s = GTools.getSharedPreferences().getString(key, "");
+			String s = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_DOWNLOAD_ID, "");
 			JSONArray arr = null;
 			if(s == null || "".equals(s))
 				arr = new JSONArray();
@@ -471,38 +423,71 @@ public class GTools {
 			}
 			
 			
-			saveSharedData(key, arr.toString());
+			saveSharedData(GCommon.SHARED_KEY_DOWNLOAD_ID, arr.toString());
 		} catch (Exception e) {
 			GLog.e(TAG,"downloadApk 保存广告信息错误");
 		}
 	}
-
-	// 上传push统计信息 type 上传类型 1:展示 2：点击 3:下载 4：安装 
-	public static void uploadPushStatistics(int pushTyp ,final int type,String pushId)
-	{
-		String data = null;
-		String url = null;
-		if(pushTyp == GCommon.PUSH_TYPE_MESSAGE)
-			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE, pushId).toString();
-		else if(pushTyp == GCommon.PUSH_TYPE_SPOT)
+	
+	// 安装一个应用 adPositionType 广告类型 intentType:打开下载界面的类型，主要用来统计二次数据
+	public static void install(Context context, String apkUrl,int adPositionType,long offerId,int intentType) {		
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		apkUrl = Environment.getExternalStorageDirectory() + "/Download/" + apkUrl;
+		intent.setDataAndType(Uri.fromFile(new File(apkUrl)),
+				"application/vnd.android.package-archive");
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		
+		String s = getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_ID, "");
+		JSONArray arr = null;
+		if(s == null || "".equals(s))
+			arr = new JSONArray();
+		else
 		{
-			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_SPOT, pushId).toString();
+			try {
+				arr = new JSONArray(s);
+			} catch (JSONException e) {
+				arr = new JSONArray();
+			}
 		}
-		else if(pushTyp == GCommon.PUSH_TYPE_MESSAGE_PIC)
+		JSONObject obj = new JSONObject();
+		
+		try {
+			obj.put("adPositionType", adPositionType);
+			obj.put("offerId", offerId);	
+			obj.put("intentType", intentType);
+			obj.put("packageName", GOfferController.getInstance().getOfferById(offerId).getString("apkPackageName"));
+		} catch (Exception e) {
+		}
+		arr.put(obj);
+
+		while(arr.length() > 10)
 		{
-			data = GTools.getPushShareDataByPushId(GCommon.SHARED_KEY_PUSHTYPE_MESSAGE_PIC, pushId).toString();
-		}	
+			arr.remove(0);
+		}
 		
-		if(type == GCommon.UPLOAD_PUSHTYPE_SHOWNUM)
-			url = GCommon.URI_UPLOAD_PUSHAD_SHOWNUM;
-		else if(type == GCommon.UPLOAD_PUSHTYPE_CLICKNUM)
-			url = GCommon.URI_UPLOAD_PUSHAD_CLICKNUM;
-		else if(type == GCommon.UPLOAD_PUSHTYPE_DOWNLOADNUM)
-			url = GCommon.URI_UPLOAD_PUSHAD_DOWNLOADNUM;
-		else if(type == GCommon.UPLOAD_PUSHTYPE_INSTALLNUM)
-			url = GCommon.URI_UPLOAD_PUSHAD_INSTALLNUM;
-		
-		httpPostRequest(url, null, null, data);		
+		saveSharedData(GCommon.SHARED_KEY_INSTALL_ID, arr.toString());
+
+	
+		context.startActivity(intent);
+	}
+
+	// 上传统计信息 type 统计类型 0:请求 1:展示 
+	// adPositionType 广告位类型
+	public static void uploadStatistics(int type ,int adPositionType,long offerId)
+	{
+		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("type", type);
+			obj.put("userName", name);
+			obj.put("adPositionType", adPositionType);
+			obj.put("offerId", offerId);
+			obj.put("packageName", GTools.getPackageName());
+			obj.put("appName",  GTools.getApplicationName());
+			httpPostRequest(GCommon.URI_UPLOAD_STATISTICS, null, null, obj);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}				
 	}
 	
 	//发送广播
@@ -551,114 +536,91 @@ public class GTools {
 		return (int[])getResourceId(name,"styleable");
 	}
 	
-	//根据推送类型获得数据 index -1 得到最后一个
-	public static JSONObject getPushShareData(String key,int index)
+	//根据key获取配置信息
+	public static Object getConfig(String key)
 	{
-		String data = GTools.getSharedPreferences().getString(key, "");
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_CONFIG, "");
 		if(data == null || "".equals(data))
 			return null;
 		try {
-			JSONArray arr = new JSONArray(data);
-			if(index == -1)
+			JSONObject obj = new JSONObject(data);			
+			if(obj  != null && obj.has(key))
 			{
-				if(key == GCommon.SHARED_KEY_PUSHTYPE_SPOT)
-					return arr.getJSONObject(arr.length()-1);
-				for(int i = arr.length()-1;i >= 0;i--)
-				{
-					JSONObject obj = arr.getJSONObject(i);
-					if(obj.getInt("order") == 0)
-						return obj;
-				}
-			}
-			else
-				return arr.getJSONObject(index);
+				return obj.get(key);
+			}			
 		} catch (Exception e) {
+			GLog.e("-------------------", "getConfig json 解析失败！");
 		}
 		return null;
 	}
-	//根据pushId 获得数据
-	public static JSONObject getPushShareDataByPushId(String key,String pushId)
+	//根据offerid 获取下载apk数据
+	public static JSONObject getDownloadApkShareDataByOfferId(long offerId)
 	{
-		String data = GTools.getSharedPreferences().getString(key, "");
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_DOWNLOAD_ID, "");
 		if(data == null || "".equals(data))
 			return null;
 		try {
 			JSONArray arr = new JSONArray(data);
-			for(int i=0;i<arr.length();i++)
+			for(int i=arr.length()-1;i>=0;i--)
 			{
 				JSONObject obj = arr.getJSONObject(i);
-				if(obj.getString("pushId").equals(pushId))
+				if(offerId == obj.getLong("offerId"))
 					return obj;
 			}
 		} catch (Exception e) {
+			GLog.e("-------------------", "getDownloadApkShareDataByOfferId json 解析失败！");
 		}
 		return null;
 	}
 	
-	//根据下载id 获得数据
-	public static JSONObject getDownloadShareDataById(String key,long  id)
+	//根据下载id 获取下载apk数据
+	public static JSONObject getDownloadApkShareDataById(long id)
 	{
-		String data = GTools.getSharedPreferences().getString(key, "");
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_DOWNLOAD_ID, "");
 		if(data == null || "".equals(data))
 			return null;
 		try {
 			JSONArray arr = new JSONArray(data);
-			for(int i=0;i<arr.length();i++)
+			for(int i=arr.length()-1;i>=0;i--)
 			{
 				JSONObject obj = arr.getJSONObject(i);
-				if(obj.getLong("id") == id)
+				if(id == obj.getLong("id"))
 					return obj;
 			}
 		} catch (Exception e) {
+			GLog.e("-------------------", "getDownloadApkShareDataById json 解析失败！");
 		}
 		return null;
 	}
 	
-	//根据pushId 获得数据
-	public static JSONObject getDownloadShareDataByPushId(String key,String pushId)
+	public static JSONObject getInstallShareDataByPackageName(String packageName)
 	{
-		String data = GTools.getSharedPreferences().getString(key, "");
+		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_ID, "");
 		if(data == null || "".equals(data))
 			return null;
 		try {
 			JSONArray arr = new JSONArray(data);
-			for(int i=0;i<arr.length();i++)
+			for(int i=arr.length()-1;i>=0;i--)
 			{
 				JSONObject obj = arr.getJSONObject(i);
-				if(obj.getString("pushId").equals(pushId))
+				if(packageName.equals(obj.getString("packageName")))
 					return obj;
 			}
 		} catch (Exception e) {
+			GLog.e("-------------------", "getInstallShareDataByPackageName json 解析失败！");
 		}
 		return null;
 	}
 	
-	//根据pushId 获得数据
-	public static JSONObject getInstallShareData(String packageName)
-	{
-		String data = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_INSTALL_AD, "");
-		if(data == null || "".equals(data))
-			return null;
-		try {
-			JSONArray arr = new JSONArray(data);
-			for(int i = arr.length()-1;i >= 0;i--)
-			{
-				JSONObject obj = arr.getJSONObject(i);
-				if(obj.getString("packageName").equals(packageName))
-					return obj;
-			}
-		} catch (Exception e) {
-		}
-		return null;
-	}
 	
 	//获取cpu占用
-	public static int getCpuUsage()
+	public static boolean getCpuUsage()
 	{
 		int use = 0;
+		String name = "";
 		try {
 			String result;
-			String apps = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_FILTER_APPS, "");
+			String apps = (String) GTools.getConfig("whiteList");
 	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
 
 	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
@@ -672,32 +634,77 @@ public class GTools {
 	    		{
 	    			String u = arr[2].split("%")[0];		    			
 	    			use = Integer.parseInt(u);
-	    			if(use >= 5)
-	    				GLog.e("-------------------", "name="+arr[9]);
+	    			name = arr[9];	    			
 	    			break;
 	    		}		    	
 	    	}
 	    	br.close();
 		} catch (Exception e) {
 		}			
-		return use;
+		if(use >= 2)
+		{
+			GLog.e("-------------------", name);	
+			return true;
+		}
+		return false;
+	}
+	//判断应用是否激活
+	public static boolean judgeAppActive(String packageName)
+	{
+		boolean active = false;
+		try {
+			String result;
+	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
+
+	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
+	    	
+	    	while((result=br.readLine()) != null)
+	    	{
+	    		result = result.trim();
+	    		String[] arr = result.split("[\\s]+");
+	    		if(arr.length == 10 && !arr[8].equals("UID") && !arr[8].equals("system") && !arr[8].equals("root")
+	    				&& arr[9].contains(packageName))
+	    		{
+	    			active = true;   
+	    			GLog.e("-------------------", packageName+"->被激活！");
+	    			break;
+	    		}		    	
+	    	}
+	    	br.close();
+		} catch (Exception e) {
+		}			
+		return active;
 	}
 	
-	public static void keepWalk()
-	{
-		Context context = QLAdController.getInstance().getContext();
-		Intent intent = new Intent(context,GSysReceiver.class);
-		intent.setAction(GCommon.ACTION_QEW_KEPP_WALK);
-        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
-        
-        // We want the alarm to go off 10 seconds from now.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-       // calendar.add(Calendar.SECOND, 50);
-        // Schedule the alarm!
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.setWindow(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),10 * 1000, sender);   
-        
-        GLog.e("---------------------------", "-------------keepWalk");
-	}
+	/** 
+     * 将px值转换为dip或dp值，保证尺寸大小不变 
+     *  
+     * @param pxValue 
+     * @param scale 
+     *            （DisplayMetrics类中属性density） 
+     * @return 
+     */  
+    public static int px2dip(float pxValue) {  
+    	Context context = GuangClient.getContext();
+        final float scale = context.getResources().getDisplayMetrics().density;  
+        return (int) (pxValue / scale + 0.5f);  
+    }  
+   
+    public static int dip2px(float dipValue) {  
+    	Context context = GuangClient.getContext();
+        final float scale = context.getResources().getDisplayMetrics().density;  
+        return (int) (dipValue * scale + 0.5f);  
+    }  
+  
+    public static int px2sp(float pxValue) {  
+    	Context context = GuangClient.getContext();
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;  
+        return (int) (pxValue / fontScale + 0.5f);  
+    }  
+
+    public static int sp2px(float spValue) {  
+    	Context context = GuangClient.getContext();
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;  
+        return (int) (spValue * fontScale + 0.5f);  
+    }  
 }

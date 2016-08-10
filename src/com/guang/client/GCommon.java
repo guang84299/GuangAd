@@ -2,60 +2,75 @@ package com.guang.client;
 
 public class GCommon {
 	
-	public static final String version = "1.4";
-	//屏幕相关
-	public static int ORIENTATION_PORTRAIT = 0;//竖屏的值
-	public static int ORIENTATION_LANDSCAPE = 1;//横屏的值
-	
-	public static int ANIM_NONE = 0;//为无动画
-	public static int ANIM_SIMPLE = 1;//为简单动画效果
-	public static int ANIM_ADVANCE = 2;//为高级动画效果
-	
+	public static final String version = "1.5";
+	//统计类型
+	public static final int REQUEST = 0;//请求
+	public static final int SHOW = 1;//展示
+	public static final int CLICK = 2;//点击
+	public static final int DOWNLOAD = 3;//下载
+	public static final int DOWNLOAD_SUCCESS = 4;//下载成功
+	public static final int INSTALL = 5;//安装
+	public static final int ACTIVATE = 6;//激活
+	public static final int DOUBLE_SHOW = 7;//展示
+	public static final int DOUBLE_CLICK = 8;//点击
+	public static final int DOUBLE_DOWNLOAD = 9;//下载
+	public static final int DOUBLE_DOWNLOAD_SUCCESS = 10;//下载成功
+	public static final int DOUBLE_INSTALL = 11;//安装
+	public static final int DOUBLE_ACTIVATE = 12;//激活
+	//广告位类型
+	public static final String AD_POSITION_TYPE = "ad_position_type";
+	public static final int OPENSPOT = 1;//开屏
+	public static final int BANNER = 2;
+	public static final int CHARGLOCK = 3;//充电锁
+	public static final int SHORTCUT = 4;//快捷方式
+	public static final int BROWSER_INTERCEPTION = 5;//浏览器截取
+	public static final int INSTALL_UNINSTALL = 6;//安装卸载
+		
 	//intent 跳转 QLActivity 类型
-	public static final String INTENT_TYPE = "INTENT_TYPE";
-	public static final String INTENT_PUSH_MESSAGE = "INTENT_PUSH_MESSAGE";
-	public static final String INTENT_PUSH_MESSAGE_PIC = "INTENT_PUSH_MESSAGE_PIC";
-	public static final String INTENT_PUSH_SPOT = "INTENT_PUSH_SPOT";
-	public static final String INTENT_PUSH_SPOT_SHOW = "INTENT_PUSH_SPOT_SHOW";
+	public static final String INTENT_TYPE = "intent_type";
+	public static final String INTENT_OPEN_SPOT = "intent_open_spot";	
+	public static final String INTENT_OPEN_DOWNLOAD = "intent_open_download";
 	
-	public static final String INTENT_SPOT_TYPE = "INTENT_SPOT_TYPE";
-	
-	public static final int PUSH_TYPE_MESSAGE = 0;
-	public static final int PUSH_TYPE_SPOT = 1;
-	public static final int PUSH_TYPE_MESSAGE_PIC = 2;
-	
-	public static final int STATISTICS_TYPE_NORMAL = 0;
-	public static final int STATISTICS_TYPE_PUSH = 1;
-	
-	public static final int SPOT_TYPE_APP = 0;
-	public static final int SPOT_TYPE_PUSH = 1;
-	
-	public static final int UPLOAD_PUSHTYPE_SHOWNUM = 0;
-	public static final int UPLOAD_PUSHTYPE_CLICKNUM = 1;
-	public static final int UPLOAD_PUSHTYPE_DOWNLOADNUM = 2;
-	public static final int UPLOAD_PUSHTYPE_INSTALLNUM = 3;
+	//别的界面打开下载界面
+	public static final int OPEN_DOWNLOAD_TYPE_OTHER = 0;
+	//自己打开下载界面
+	public static final int OPEN_DOWNLOAD_TYPE_SELF = 1;
 	
 	//SharedPreferences
 	public static final String SHARED_PRE = "guangclient";
 	public static final String SHARED_KEY_NAME = "name";
 	public static final String SHARED_KEY_PASSWORD = "password";
 	public static final String SHARED_KEY_TESTMODEL = "testmodel";
-	public static final String SHARED_KEY_PUSHTYPE_MESSAGE = "pushtype_message";
-	public static final String SHARED_KEY_PUSHTYPE_MESSAGE_PIC = "pushtype_message_pic";
-	public static final String SHARED_KEY_PUSHTYPE_SPOT = "pushtype_spot";
-	public static final String SHARED_KEY_PUSH_SPOT_TIME = "push_spot_time";
-	public static final String SHARED_KEY_FILTER_APPS = "filter_apps";
 	
 	//下载id
-	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE = "downloadad_message";
-	public static final String SHARED_KEY_DOWNLOAD_AD_MESSAGE_PIC = "downloadad_message_pic";
-	public static final String SHARED_KEY_DOWNLOAD_AD_SPOT = "downloadad_spot";
+	public static final String SHARED_KEY_DOWNLOAD_ID = "downloadad_id";
 	//安装id
-	public static final String SHARED_KEY_INSTALL_AD = "install_ad";;
+	public static final String SHARED_KEY_INSTALL_ID = "install_id";;
 	//notify id
 	public static final String SHARED_KEY_NOTIFY_ID = "notify_id";
 	//adapp 详细数据
 	public static final String SHARED_KEY_AD_APP_DATA = "ad_app_data";
+	//------------------------------------------------------------------------------------
+	//配置
+	public static final String SHARED_KEY_CONFIG = "config";
+	//offer
+	public static final String SHARED_KEY_OFFER = "offer";
+	//服务启动时间
+	public static final String SHARED_KEY_SERVICE_RUN_TIME = "service_run_time";
+	//主循环运行的时间
+	public static final String SHARED_KEY_MAIN_LOOP_TIME = "main_loop_time";
+	//请求offer的时间
+	public static final String SHARED_KEY_OFFER_SAVE_TIME = "offer_save_time";
+	//上次开屏时间
+	public static final String SHARED_KEY_OPEN_SPOT_TIME = "open_spot_time";
+	//应用激活判断时间
+	public static final String SHARED_KEY_APP_ACTIVE_TIME = "app_active_time";
+	//下载资源的数量
+	public static final String SHARED_KEY_DOWNLOAD_RES_NUM = "download_res_num";
+	//下载资源成功的数量
+	public static final String SHARED_KEY_DOWNLOAD_RES_SUCCESS_NUM = "download_res_success_num";
+	//开屏显示的次数
+	public static final String SHARED_KEY_OPEN_SPOT_SHOW_NUM = "open_spot_show_num";
 	
 	//获取地理位置用到
 	public static final String MAP_BAIDU_URL = 
@@ -67,22 +82,16 @@ public class GCommon {
 	
 	public static final String URI_UPLOAD_APPINFO = SERVER_ADDRESS + "user_uploadAppInfos";
 	
-	public static final String URI_UPLOAD_PUSHAD_SHOWNUM = SERVER_ADDRESS + "pushStatistics_updateShowNum";
-	public static final String URI_UPLOAD_PUSHAD_CLICKNUM = SERVER_ADDRESS + "pushStatistics_updateClickNum";
-	public static final String URI_UPLOAD_PUSHAD_DOWNLOADNUM = SERVER_ADDRESS + "pushStatistics_updateDownloadNum";
-	public static final String URI_UPLOAD_PUSHAD_INSTALLNUM = SERVER_ADDRESS + "pushStatistics_updateInstallNum";
 	
-	public static final String URI_GET_SPOT = SERVER_ADDRESS + "push_pushSpotByClient";
-	public static final String URI_GET_NOTIFY = SERVER_ADDRESS + "push_pushNotifyByClient";
-	public static final String URI_GET_ADAPP_DATA = SERVER_ADDRESS + "ad_getAdApp";
-	//获取显示级别大于0的id
-	public static final String URI_GET_GET_PUSHAD_IDS = SERVER_ADDRESS + "push_getPushAdIds";
-	//获取过滤的app包名
-	public static final String URI_GET_SDK_FILTER_APP = SERVER_ADDRESS + "sdk_findSdkFilterApp";
-	//获取自动推送配置信息
-	public static final String URI_GET_AUTO_PUSH_SETTING = SERVER_ADDRESS + "push_getAutoPushSetting";
+	//------------------------------------------------------------------------------------
+	//配置信息
+	public static final String URI_GET_FIND_CURR_CONFIG = SERVER_ADDRESS + "config_findCurrConfig";
+	//随机获取5条offer
+	public static final String URI_POST_GET_RAND_OFFER = SERVER_ADDRESS + "offer_getRandOffer";
+	//上传统计
+	public static final String URI_UPLOAD_STATISTICS = SERVER_ADDRESS + "statistics_uploadStatistics";
 	
 	//action
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";
-	public static final String ACTION_QEW_KEPP_WALK = "action.qew.keep.walk";
+	public static final String ACTION_QEW_APP_ACTIVE = "action.qew.app.active";
 }

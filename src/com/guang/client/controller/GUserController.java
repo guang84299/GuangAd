@@ -1,25 +1,22 @@
 package com.guang.client.controller;
 
 import org.apache.mina.core.session.IoSession;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 
 import com.guang.client.GCommon;
 import com.guang.client.GSysService;
-import com.guang.client.GuangClient;
 import com.guang.client.mode.GUser;
 import com.guang.client.protocol.GData;
 import com.guang.client.protocol.GProtocol;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
-import com.qinglu.ad.QLAdController;
-import com.qinglu.ad.QLNotifier;
 
 @TargetApi(Build.VERSION_CODES.KITKAT)
 @SuppressLint("NewApi")
@@ -27,7 +24,6 @@ public class GUserController {
 	
 	private static GUserController instance;
 	public static boolean isLogin = false;
-	private IoSession session;
 	private GUserController(){}
 	
 	public static GUserController getInstance()
@@ -49,7 +45,6 @@ public class GUserController {
 	public void login(IoSession session)
 	{
 		isLogin = false;
-		this.session = session;
 		if(isRegister())
 		{
 			String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
@@ -163,20 +158,8 @@ public class GUserController {
 			GData data = new GData(GProtocol.MODE_USER_HEART_BEAT, "1");
 			session.write(data.pack());
 		}	
-		//GTools.sendBroadcast(GCommon.ACTION_QEW_APP_STARTUP);
 	}
-	//主动发送心跳
-	public void sendHeartBeat()
-	{
-		GLog.e("---------------------", "sendHeartBeat");
-		if(isLogin && session != null && session.isConnected())
-		{
-			GLog.e("---------------------", "sendHeartBeat  start");
-			GData data = new GData(GProtocol.MODE_USER_HEART_BEAT, "1");
-			session.write(data.pack());
-			GLog.e("---------------------", "sendHeartBeat  end");
-		}	
-	}
+	
 	//上传app信息
 	public void uploadAppInfos()
 	{
@@ -198,49 +181,35 @@ public class GUserController {
 	{
 		GUserController.isLogin = true;
 		
+		//判断登录时间是否大于服务启动时间
+		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SERVICE_RUN_TIME, 0l);
+		long n_time = SystemClock.elapsedRealtime();
+		if(n_time - time > 50*1000)
+			return;
+		GLog.e("---------------", "登录成功");
 		//注册成功上传app信息
-		GUserController.getInstance().uploadAppInfos();
+		GUserController.getInstance().uploadAppInfos();		
 		
-		//登录成功下载必要资源
-		GTools.downloadRes(GCommon.SERVER_ADDRESS, null, null, "images/close.png",true);
-		GTools.httpGetRequest(GCommon.URI_GET_GET_PUSHAD_IDS, QLNotifier.getInstance(), "adIdDataRev",null);
-		//得到app过滤资源
-		GTools.httpGetRequest(GCommon.URI_GET_SDK_FILTER_APP, GSysService.getInstance(), "start2",null);
-		//获取系统配置信息
-		GTools.httpGetRequest(GCommon.URI_GET_AUTO_PUSH_SETTING, this, "revAutoPushSetting",null);
+		//获取最新配置信息
+		GTools.httpGetRequest(GCommon.URI_GET_FIND_CURR_CONFIG, this, "revFindCurrConfig",null);
 	}
 	
-	public void revAutoPushSetting(Object ob,Object rev)
+	//重启循环
+	public void restarMainLoop()
 	{
-		JSONObject obj = null;
-		boolean autoState = false;
-		int autoPushType = 1;
-		float waitTime = 0.1f;
-		try {
-			 obj = new JSONObject(rev.toString());	
-			 autoState = obj.getBoolean("autoState");
-			 autoPushType = obj.getInt("autoPushType");
-			 waitTime = (float) obj.getDouble("waitTime");
-		} catch (Exception e) {
-		}
-		final int type = autoPushType;
-		final float time = waitTime;
-		
-		if(autoState)
+		//获取最新配置信息
+		GTools.httpGetRequest(GCommon.URI_GET_FIND_CURR_CONFIG, this, "revFindCurrConfig",null);
+	}
+	
+	public void revFindCurrConfig(Object ob,Object rev)
+	{
+		//保存配置
+		if(rev != null && !"".equals(rev))
 		{
-			new Thread(){
-				public void run() {
-					try {
-						Thread.sleep((long) (1000*60*time));
-						if(type == 1)
-							QLNotifier.getInstance().showNotify();
-						else
-							QLAdController.getSpotManager().showSpotAds(GuangClient.getContext());
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				};
-			}.start();
+			GTools.saveSharedData(GCommon.SHARED_KEY_CONFIG, rev.toString());
+			//开始走流程
+			GSysService.getInstance().startMainLoop();
 		}
 	}
+		
 }

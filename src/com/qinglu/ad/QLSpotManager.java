@@ -20,7 +20,6 @@ public interface QLSpotManager {
 	//展示插屏广告
 	 void showSpotAds(Context con);
 	 void showSpotAds(Context con,QLSpotDialogListener spotDialogListener);
-	 void showSpotAd(Object obj,Object rev);
 	 //开屏加载
 	 void loadSplashSpotAds();
 	 //开屏广告简单调用
