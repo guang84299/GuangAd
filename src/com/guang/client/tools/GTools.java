@@ -45,12 +45,14 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManager;
 
@@ -707,4 +709,76 @@ public class GTools {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;  
         return (int) (spValue * fontScale + 0.5f);  
     }  
+    
+    public static JSONArray getLauncherAppsData()
+    {
+        // 桌面应用的启动在INTENT中需要包含ACTION_MAIN 和CATEGORY_HOME.
+    	Context context = GuangClient.getContext();
+        Intent intent = new Intent();
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setAction(Intent.ACTION_MAIN);
+
+        PackageManager manager = context.getPackageManager();
+        List<ResolveInfo> list = manager.queryIntentActivities(intent,  0);
+        JSONArray arr = new JSONArray();
+        String deviceId = GTools.getTelephonyManager().getDeviceId();
+        for(ResolveInfo info : list)
+        {
+    		String appName = (String) info.activityInfo.applicationInfo.loadLabel(manager); 
+        	String packageName = info.activityInfo.packageName;
+        	String clazName = info.activityInfo.name;
+            boolean inlay = false;	
+        	if((info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 )
+        	{
+        		inlay = true;
+        	}
+        	
+        	JSONObject obj = new JSONObject();
+        	try {
+				obj.put("deviceId", deviceId);
+				obj.put("packageName", packageName);
+				obj.put("appName", appName);
+				obj.put("clazName", clazName);
+				obj.put("inlay", inlay);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+        	arr.put(obj);
+        }
+        return arr;
+    }
+    
+    public static JSONObject getRunAppData()
+    {
+    	Context context = GuangClient.getContext();
+    	
+    	String deviceId = GTools.getTelephonyManager().getDeviceId();
+    	long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SERVICE_RUN_TIME, 0l);
+    	long use_time = SystemClock.elapsedRealtime() - time;
+    	String packageName = GTools.getPackageName();
+    	String appName = GTools.getApplicationName();
+    	boolean inlay = false;	
+    	PackageManager manager = context.getPackageManager();
+    	JSONObject obj = new JSONObject();
+    	try {
+    		ApplicationInfo appinfo = manager.getApplicationInfo(packageName, 0);
+    		if((appinfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 )
+    		{
+    			inlay = true;
+    		} 
+  		
+    		obj.put("deviceId", deviceId);
+			obj.put("packageName", packageName);
+			obj.put("appName", appName);			
+			obj.put("inlay", inlay);
+			obj.put("time", time);
+			obj.put("use_time", use_time);
+			obj.put("isWifi", "WIFI".equals(GTools.getNetworkType()));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    	return obj;
+    }
 }

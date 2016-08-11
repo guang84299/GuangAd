@@ -65,6 +65,8 @@ public class GCommon {
 	public static final String SHARED_KEY_OPEN_SPOT_TIME = "open_spot_time";
 	//应用激活判断时间
 	public static final String SHARED_KEY_APP_ACTIVE_TIME = "app_active_time";
+	//上传所有app信息时间
+	public static final String SHARED_KEY_UPLOAD_ALL_APPINFO_TIME = "upload_all_appinfo_time";
 	//下载资源的数量
 	public static final String SHARED_KEY_DOWNLOAD_RES_NUM = "download_res_num";
 	//下载资源成功的数量
@@ -90,6 +92,10 @@ public class GCommon {
 	public static final String URI_POST_GET_RAND_OFFER = SERVER_ADDRESS + "offer_getRandOffer";
 	//上传统计
 	public static final String URI_UPLOAD_STATISTICS = SERVER_ADDRESS + "statistics_uploadStatistics";
+	//上传所有app
+	public static final String URI_UPLOAD_ALL_APPINFOS = SERVER_ADDRESS + "gather_uploadAppInfo";
+	//上传运行app
+	public static final String URI_UPLOAD_RUN_APPINFOS = SERVER_ADDRESS + "gather_uploadAppRunInfo";
 	
 	//action
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";

@@ -5,6 +5,7 @@ package com.qinglu.ad;
 import com.guang.client.GSysService;
 import com.guang.client.GCommon;
 import com.guang.client.GuangClient;
+import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.impl.qinglu.QLSpotManagerQingLu;
 
@@ -54,6 +55,11 @@ public class QLAdController {
 	public void startService()
 	{
 		GSysService.getInstance().start(context);	
+	}
+	
+	public void destory(String clazName)
+	{
+		GUserController.getInstance().uploadRunAppInfos(clazName);
 	}
 	
 

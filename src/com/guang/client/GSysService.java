@@ -21,10 +21,13 @@ public class GSysService  {
 	private static Context contexts;
 	private static GSysReceiver receiver;
 	private String activePackageName;
+	private boolean isPresent;
+	private boolean isRuning;
 	
 	private GSysService()
 	{
-		
+		isPresent = false;
+		isRuning = false;
 	}
 	
 	public static GSysService getInstance()
@@ -71,7 +74,8 @@ public class GSysService  {
 				while(isMainLoop())
 				{
 					try {																								
-						if(		isWifi()
+						if(		isPresent 
+								&& isWifi()
 								&& isAppSwitch()
 								&& isShowTimeInterval()
 								&& isShowNum()
@@ -96,6 +100,8 @@ public class GSysService  {
 	
 	private void initData()
 	{
+		isPresent = true;
+		isRuning = true;
 		long n_time = SystemClock.elapsedRealtime();
 		GTools.saveSharedData(GCommon.SHARED_KEY_MAIN_LOOP_TIME, n_time);
 		GTools.saveSharedData(GCommon.SHARED_KEY_OFFER_SAVE_TIME, 0l);
@@ -249,8 +255,28 @@ public class GSysService  {
         IntentFilter filter = new IntentFilter();
         filter.addAction(GCommon.ACTION_QEW_APP_STARTUP);
         filter.addAction(GCommon.ACTION_QEW_APP_ACTIVE);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
         contexts.registerReceiver(receiver, filter);
     }
+
+	
+	public boolean isPresent() {
+		return isPresent;
+	}
+
+	public void setPresent(boolean isPresent) {
+		this.isPresent = isPresent;
+	}
+
+	public boolean isRuning() {
+		return isRuning;
+	}
+
+	public void setRuning(boolean isRuning) {
+		this.isRuning = isRuning;
+	}
  
    
 }

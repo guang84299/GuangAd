@@ -118,6 +118,22 @@ public final class GSysReceiver extends BroadcastReceiver {
 				e.printStackTrace();
 			}			
 		}
+		
+		//ËøÆÁ
+		else if(Intent.ACTION_SCREEN_OFF.equals(action))
+		{
+			GSysService.getInstance().setPresent(false);
+		}
+		//¿ªÆÁ
+		else if(Intent.ACTION_USER_PRESENT.equals(action))
+		{
+			GSysService.getInstance().setPresent(true);
+		}
+		//ÁÁÆÁ
+		else if(Intent.ACTION_SCREEN_ON.equals(action))
+		{
+			
+		}
 	}
 
 }

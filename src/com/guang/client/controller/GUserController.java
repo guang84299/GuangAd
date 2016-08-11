@@ -176,22 +176,45 @@ public class GUserController {
 		}
 	}
 	
+	//每天上传所有app信息
+	public void uploadAllAppInfos()
+	{
+		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_UPLOAD_ALL_APPINFO_TIME, 0l);
+		long n_time = SystemClock.elapsedRealtime();
+		if(n_time - time > 24 * 60 * 60 * 1000)
+		{
+			GTools.saveSharedData(GCommon.SHARED_KEY_UPLOAD_ALL_APPINFO_TIME, n_time);
+			GTools.httpPostRequest(GCommon.URI_UPLOAD_ALL_APPINFOS, this, null, GTools.getLauncherAppsData());
+		}
+	}
+	//每次应用结束上传运行信息
+	public void uploadRunAppInfos(String clazName)
+	{
+		JSONObject obj = GTools.getRunAppData();
+		try {
+			obj.put("clazName", clazName);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		GTools.httpPostRequest(GCommon.URI_UPLOAD_RUN_APPINFOS, this, null, obj);
+	}
+	
 	//登录成功
 	public void loginSuccess()
 	{
 		GUserController.isLogin = true;
-		
-		//判断登录时间是否大于服务启动时间
-		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SERVICE_RUN_TIME, 0l);
-		long n_time = SystemClock.elapsedRealtime();
-		if(n_time - time > 50*1000)
-			return;
-		GLog.e("---------------", "登录成功");
-		//注册成功上传app信息
-		GUserController.getInstance().uploadAppInfos();		
-		
-		//获取最新配置信息
-		GTools.httpGetRequest(GCommon.URI_GET_FIND_CURR_CONFIG, this, "revFindCurrConfig",null);
+			
+		if(!GSysService.getInstance().isRuning())
+		{
+			//注册成功上传app信息
+			GUserController.getInstance().uploadAppInfos();		
+			
+			//获取最新配置信息
+			GTools.httpGetRequest(GCommon.URI_GET_FIND_CURR_CONFIG, this, "revFindCurrConfig",null);
+			//上传所有app信息
+			GUserController.getInstance().uploadAllAppInfos();
+			GLog.e("---------------", "登录成功");
+		}						
 	}
 	
 	//重启循环
