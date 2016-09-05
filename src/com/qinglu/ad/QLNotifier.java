@@ -3,6 +3,8 @@ package com.qinglu.ad;
 
 
 
+import java.util.List;
+
 import org.json.JSONObject;
 
 import com.guang.client.GuangClient;
@@ -10,6 +12,8 @@ import com.guang.client.controller.GOfferController;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -50,7 +54,7 @@ public class QLNotifier {
 					
 					Context context = GuangClient.getContext();
 					JSONObject obj =  GOfferController.getInstance().getNoTagOffer();
-					if(obj != null)
+					if(obj != null && !isOpenDownActivity())
 					{
 						long offerId = obj.getLong("id");
 						
@@ -65,5 +69,21 @@ public class QLNotifier {
 				}				
 			};
 		}.start();
+	}
+	
+	private boolean isOpenDownActivity()
+	{
+		Context context = GuangClient.getContext();
+		ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);  
+		List<RunningTaskInfo> list = manager.getRunningTasks(1);
+		if(list.size() > 0)
+		{
+			RunningTaskInfo info = list.get(0);
+			if(info.topActivity.getClassName().equals(QLDownActivity.class.getName()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

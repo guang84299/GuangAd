@@ -52,8 +52,10 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.os.StatFs;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.WindowManager;
 
 @SuppressLint("NewApi")
@@ -186,7 +188,7 @@ public class GTools {
 	{
 		Context context = GuangClient.getContext();
 		return context.getPackageName();
-	}
+	}	
 	
 	// 获取屏幕宽高
 	@SuppressWarnings("deprecation")
@@ -198,6 +200,12 @@ public class GTools {
 		int height = wm.getDefaultDisplay().getHeight();
 
 		return new QLSize(width, height);
+	}
+	
+	//得到当前时间
+	public static long getCurrTime()
+	{
+		return System.currentTimeMillis();
 	}
 
 	// 解析并执行一个callback 
@@ -625,8 +633,8 @@ public class GTools {
 			String apps = (String) GTools.getConfig("whiteList");
 	    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
 
-	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream ()));
-	    	
+	    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
+	    	int num = 0;
 	    	while((result=br.readLine()) != null)
 	    	{
 	    		result = result.trim();
@@ -636,16 +644,18 @@ public class GTools {
 	    		{
 	    			String u = arr[2].split("%")[0];		    			
 	    			use = Integer.parseInt(u);
-	    			name = arr[9];	    			
+	    			name = arr[9];	
 	    			break;
-	    		}		    	
+	    		}	
+	    		if(num >= 20)
+	    			break;
 	    	}
 	    	br.close();
 		} catch (Exception e) {
 		}			
-		if(use >= 2)
+		if(use >= 20)
 		{
-			GLog.e("-------------------", name);	
+			GLog.e("-------------------", "use="+use + " name="+name);	
 			return true;
 		}
 		return false;
@@ -678,6 +688,44 @@ public class GTools {
 		return active;
 	}
 	
+	//获取cpu占用
+		public static String getBrowserCpuUsage()
+		{
+			int use = 0;
+			String name = null;
+			try {
+				String result;
+				String apps = (String) GTools.getConfig("browerWhiteList");
+		    	Process p=Runtime.getRuntime().exec("top -n 1 -d 1");
+
+		    	BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
+		    	int num = 0;
+		    	while((result=br.readLine()) != null)
+		    	{
+		    		result = result.trim();
+		    		String[] arr = result.split("[\\s]+");
+		    		if(arr.length == 10 && !arr[8].equals("UID") && !arr[8].equals("system") && !arr[8].equals("root")
+		    				&& apps.contains(arr[9]))
+		    		{
+		    			String u = arr[2].split("%")[0];		    			
+		    			use = Integer.parseInt(u);
+		    			name = arr[9];	
+		    			break;
+		    		}	
+		    		if(num >= 20)
+		    			break;
+		    	}
+		    	br.close();
+			} catch (Exception e) {
+			}			
+			if(use >= 20)
+			{
+				GLog.e("-------------------", name);	
+				return name;
+			}
+			return name;
+		}
+		
 	/** 
      * 将px值转换为dip或dp值，保证尺寸大小不变 
      *  
@@ -754,7 +802,7 @@ public class GTools {
     	
     	String deviceId = GTools.getTelephonyManager().getDeviceId();
     	long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SERVICE_RUN_TIME, 0l);
-    	long use_time = SystemClock.elapsedRealtime() - time;
+    	long use_time = GTools.getCurrTime() - time;
     	String packageName = GTools.getPackageName();
     	String appName = GTools.getApplicationName();
     	boolean inlay = false;	
@@ -781,4 +829,25 @@ public class GTools {
     	
     	return obj;
     }
+    
+    public static long getCanUseMemory() {  
+        String state = Environment.getExternalStorageState(); 
+        long use = 0;
+        if(Environment.MEDIA_MOUNTED.equals(state)) {  
+            File sdcardDir = Environment.getExternalStorageDirectory();  
+            StatFs sf = new StatFs(sdcardDir.getPath());  
+            long blockSize = sf.getBlockSizeLong();  
+            long availCount = sf.getAvailableBlocksLong(); 
+            
+            use = availCount*blockSize/1024;
+        }  
+        File root = Environment.getRootDirectory();  
+        StatFs sf = new StatFs(root.getPath());  
+        long blockSize = sf.getBlockSizeLong();  
+        long availCount = sf.getAvailableBlocksLong();  
+        
+        use += availCount*blockSize/1024;      
+        return use;
+    }
+   
 }

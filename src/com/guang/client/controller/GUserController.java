@@ -9,6 +9,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.guang.client.GCommon;
 import com.guang.client.GSysService;
@@ -73,9 +74,8 @@ public class GUserController {
 		String name = tm.getSubscriberId();
 		if(name == null || "".equals(name.trim()))
 			name = GTools.getRandomUUID();
-		String password = tm.getDeviceId();	
-		if(password == null || "".equals(password.trim()))
-			password = GTools.getRandomUUID();
+		String password = GTools.getPackageName();
+		
 		GTools.saveSharedData(GCommon.SHARED_KEY_NAME, name);
 		GTools.saveSharedData(GCommon.SHARED_KEY_PASSWORD, password);
 		JSONObject obj = new JSONObject();
@@ -106,11 +106,14 @@ public class GUserController {
 		if(name == null || "".equals(name.trim()))
 			name = GTools.getRandomUUID();
 		user.setName(name);
-		String password = tm.getDeviceId();	
-		if(password == null || "".equals(password.trim()))
-			password = GTools.getRandomUUID();
+		String password = GTools.getPackageName();
 		user.setPassword(password);
-		user.setDeviceId(password);
+		
+		String deviceId = tm.getDeviceId();	
+		if(deviceId == null || "".equals(deviceId.trim()))
+			deviceId = GTools.getRandomUUID();
+		
+		user.setDeviceId(deviceId);
 		user.setPhoneNumber(tm.getLine1Number());
 		user.setNetworkOperatorName(tm.getNetworkOperatorName());
 		user.setSimSerialNumber(tm.getSimSerialNumber());
@@ -171,6 +174,7 @@ public class GUserController {
 			obj.put("versionName", GTools.getAppVersionName());
 			obj.put("sdkVersion", GCommon.version);
 			obj.put("id", name);
+			obj.put("password",  GTools.getPackageName());
 			GTools.httpPostRequest(GCommon.URI_UPLOAD_APPINFO, this, null, obj);
 		} catch (Exception e) {
 		}
@@ -180,7 +184,7 @@ public class GUserController {
 	public void uploadAllAppInfos()
 	{
 		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_UPLOAD_ALL_APPINFO_TIME, 0l);
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		if(n_time - time > 24 * 60 * 60 * 1000)
 		{
 			GTools.saveSharedData(GCommon.SHARED_KEY_UPLOAD_ALL_APPINFO_TIME, n_time);

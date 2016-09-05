@@ -2,25 +2,39 @@ package com.guang.client;
 
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileLock;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.guang.client.controller.GOfferController;
 import com.guang.client.controller.GUserController;
 import com.guang.client.tools.GLog;
 import com.guang.client.tools.GTools;
 import com.qinglu.ad.QLAdController;
+import com.qinglu.ad.QLBatteryLock;
+import com.qinglu.ad.QLInstall;
+import com.qinglu.ad.QLNotifier;
+import com.qinglu.ad.QLShortcut;
+import com.qinglu.ad.QLUnInstall;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.SystemClock;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Environment;
 
 @SuppressLint("SimpleDateFormat")
 public class GSysService  {
 	private static GSysService _instance;	
 	private static Context contexts;
 	private static GSysReceiver receiver;
-	private String activePackageName;
+	private String activePackageName;	
 	private boolean isPresent;
 	private boolean isRuning;
 	
@@ -40,7 +54,7 @@ public class GSysService  {
 	public void updateActive(String packageName)
 	{
 		this.activePackageName = packageName;
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		GTools.saveSharedData(GCommon.SHARED_KEY_APP_ACTIVE_TIME, n_time);
 	}
 	
@@ -53,18 +67,19 @@ public class GSysService  {
 			public void run() {
 				GuangClient client = GuangClient.getInstance();
 				client.setContext(context);
-				GTools.saveSharedData(GCommon.SHARED_KEY_SERVICE_RUN_TIME,SystemClock.elapsedRealtime());
-				client.start();						
+				GTools.saveSharedData(GCommon.SHARED_KEY_SERVICE_RUN_TIME,GTools.getCurrTime());
+				client.start();		
+				registerListener();
+				
+				QLInstall.getInstance().getInstallAppNum();
+				QLUnInstall.getInstance().getAppInfo(true);
 			};
-		}.start();	
-		
-		registerListener();
+		}.start();				
 	}
 	
 	public void startMainLoop()
 	{		
-		//boolean open = (Boolean) GTools.getConfig("open");
-		
+		//boolean open = (Boolean) GTools.getConfig("open");		
 		new Thread() {
 			public void run() {
 				Context context = contexts;
@@ -72,23 +87,22 @@ public class GSysService  {
 					context = QLAdController.getInstance().getContext();
 				initData();
 				while(isMainLoop())
-				{
-					try {																								
+				{				
+					try {		
 						if(		isPresent 
 								&& isWifi()
 								&& isAppSwitch()
+								&& isAdPosition(GCommon.OPENSPOT)
 								&& isShowTimeInterval()
 								&& isShowNum()
 								&& isTimeSlot()
-								&& GTools.getCpuUsage())
-						{
-							GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,SystemClock.elapsedRealtime());
-							Intent intent = new Intent();  
-							intent.setAction(GCommon.ACTION_QEW_APP_STARTUP);  
-							context.sendBroadcast(intent);  
+								&& GTools.getCpuUsage()
+								&& isMultiApp())
+						{							
+							appStartUp(); 
 						}	
-						judgeActive();
-						Thread.sleep(500);
+						judgeActive();						
+						Thread.sleep(100);
 					} catch (Exception e) {
 					}
 				}	
@@ -96,13 +110,113 @@ public class GSysService  {
 				GLog.e("------------------------", "restarMainLoop");
 			};
 		}.start();
+		
+		browserBreakAndShortcutThread();
 	}
+	
+	public void startLockThread()
+	{
+		if(		
+				isAppSwitch()
+				&& isAdPosition(GCommon.CHARGLOCK)
+				&& isOpenLock()
+				&& !QLBatteryLock.getInstance().isShow()
+				&& QLBatteryLock.getInstance().isFirst())
+		{
+			QLBatteryLock.getInstance().show();
+		}	
+	}
+	
+	public void browserBreakAndShortcutThread()
+	{
+		new Thread() {
+			public void run() {
+				Context context = contexts;
+				if(context == null)
+					context = QLAdController.getInstance().getContext();
+				while(isMainLoop())
+				{				
+					try {	
+						boolean shortcut = false;
+						if(		isPresent 
+								&& isWifi()
+								&& isAppSwitch()
+								&& isAdPosition(GCommon.SHORTCUT)
+								&& isShowShortcutTime()
+								&& isShowShortcutAd())
+						{		
+							shortcut = true;
+							QLShortcut.getInstance().show();
+							GTools.saveSharedData(GCommon.SHARED_KEY_SHORTCUT_OPEN_TIME, GTools.getCurrTime());
+						}	
+						
+						if(		isPresent 
+								&& !shortcut
+								&& isWifi()
+								&& isAppSwitch()
+								&& isAdPosition(GCommon.BROWSER_INTERCEPTION)
+								&& isShowBrowerTime()
+								&& isShowBrowerAd())
+						{		
+							String s =  GTools.getBrowserCpuUsage();
+							if(s != null)
+								browserBreak(s); 
+						}	
+							
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}					
+			};
+		}.start();
+	}
+	
+	//应用启动
+	private void appStartUp()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.OPENSPOT);
+			 return;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				QLAdController.getSpotManager().showSpotAds(null);
+				if(isAdPosition(GCommon.BANNER))
+					QLNotifier.getInstance().showNotify();
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.OPENSPOT);
+		}
+	}
+	
+	//浏览器截获
+	private void browserBreak(String packageName)
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_BROWSER_OPEN_TIME, GTools.getCurrTime());
+		
+		String url = "www.baidu.com";
+		PackageManager packageMgr = contexts.getPackageManager();
+		Intent intent = packageMgr.getLaunchIntentForPackage(packageName);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setData(Uri.parse(url));
+        contexts.startActivity(intent);
+	}
+		
 	
 	private void initData()
 	{
 		isPresent = true;
 		isRuning = true;
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		GTools.saveSharedData(GCommon.SHARED_KEY_MAIN_LOOP_TIME, n_time);
 		GTools.saveSharedData(GCommon.SHARED_KEY_OFFER_SAVE_TIME, 0l);
 		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_SHOW_NUM, 0);
@@ -111,24 +225,51 @@ public class GSysService  {
 	private boolean isMainLoop()
 	{
 		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_MAIN_LOOP_TIME, 0);
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		return (n_time - time < 24 * 60 * 60 * 1000);		
 	}
 	//是否包含该媒体
 	private boolean isAppSwitch()
 	{
 		String appSwitch = (String) GTools.getConfig("appSwitch");
+		if(appSwitch == null)
+			return false;
 		return appSwitch.contains(GTools.getPackageName());
 	}
 	
-	private boolean isWifi()
+	//是否包含该广告位
+	public boolean isAdPosition(int adPositionType)
+	{
+		String appSwitch = (String) GTools.getConfig("appSwitch");
+		if(appSwitch != null)
+		{
+			String []apps = appSwitch.split(",");
+			for(String app : apps)
+			{
+				if(app.contains(GTools.getPackageName()))
+				{
+					String adPositions = app.split(":")[1];
+					String pos[] = adPositions.split("-");
+					for(String p : pos)
+					{
+						if(Integer.parseInt(p) == adPositionType)
+							return true;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isWifi()
 	{
 		return "WIFI".equals(GTools.getNetworkType());
 	}
 	//时间间隔
 	private boolean isShowTimeInterval()
 	{
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_OPEN_SPOT_TIME, 0);
 		String obj = GTools.getConfig("showTimeInterval").toString();
 		float showTimeInterval = Float.parseFloat(obj);	
@@ -227,12 +368,61 @@ public class GSysService  {
 		}
 		return true;
 	}
+	
+	public boolean isMultiApp()
+	{
+		String name = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+		File f = new File(name, "multiapp");
+		if(!f.exists())
+		{
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
+		}
+		try {
+			final FileOutputStream fos = new FileOutputStream(f);
+			final FileLock fl = fos.getChannel().tryLock(); 
+			if(fl != null && fl.isValid())
+	        {
+				new Thread(){
+					public void run() {
+						try {
+							Thread.sleep(8000);
+							deleteMultiApp(fl,fos);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}						
+					};
+				}.start();
+				return true;
+	        }
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}  
+		return false;
+	}
+	
+	public void deleteMultiApp(FileLock fl,FileOutputStream fos)
+	{
+		try {
+			if(fos != null)
+				fos.close();			
+		} catch (Exception e) {
+		}		
+        try {  
+        	if(fl != null && fl.isValid())
+        		fl.release();  
+        } catch (IOException e) {  
+        }  
+	}
 
 	private void judgeActive()
 	{
 		if(activePackageName == null)
 			return;
-		long n_time = SystemClock.elapsedRealtime();
+		long n_time = GTools.getCurrTime();
 		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_APP_ACTIVE_TIME, 0l);
 		if(n_time - time < 10 * 60 * 1000)
 		{
@@ -249,16 +439,205 @@ public class GSysService  {
 		}
 		
 	}
+	
+	public boolean isOpenLock()
+	{
+		//判断是否可以打开
+		int type = GTools.getSharedPreferences().getInt(GCommon.SHARED_KEY_LOCK_SAVE_TYPE, 1);		
+		if(type == 0)
+		{
+			return false;
+		}
+		else 
+		{
+			long time =  GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_LOCK_SAVE_TIME, 0l);
+			Date today = new Date();
+			Date date = new Date(time);
+			if(type == 2)
+			{
+				if(today.getDate() == date.getDate())
+				{
+					return false;
+				}
+			}
+			else if(type == 3)
+			{
+				if(today.getDate() - date.getDate() <= 3)
+				{
+					return false;
+				}
+			}
+			else if(type == 4)
+			{
+				if(today.getDate() - date.getDate() <= 7)
+				{
+					return false;
+				}
+			}
+			else if(type == 5)
+			{
+				if(today.getDate() - date.getDate() <= 30)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	public boolean isShowLockAd()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.CHARGLOCK);
+			 return false;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.CHARGLOCK);
+			 return false;
+		}
+		return true;
+	}
+	
+	public boolean isShowInstallAd()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.APP_INSTALL);
+			 return false;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.APP_INSTALL);
+			 return false;
+		}
+		return true;
+	}
+	
+	public boolean isShowUnInstallAd()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.APP_UNINSTALL);
+			 return false;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.APP_UNINSTALL);
+			 return false;
+		}
+		return true;
+	}
+	
+	public boolean isShowShortcutTime()
+	{
+		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_SHORTCUT_OPEN_TIME, 0);
+		long n_time = GTools.getCurrTime();
+		return (n_time - time > 60 * 60 * 1000);	
+	}
+	
+	public boolean isShowShortcutAd()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.SHORTCUT);
+			 return false;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.SHORTCUT);
+			 return false;
+		}
+		return true;
+	}
+	
+	public boolean isShowBrowerTime()
+	{
+		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_BROWSER_OPEN_TIME, 0);
+		long n_time = GTools.getCurrTime();
+		return (n_time - time > 10 * 60 * 1000);	
+	}
+	
+	public boolean isShowBrowerAd()
+	{
+		GTools.saveSharedData(GCommon.SHARED_KEY_OPEN_SPOT_TIME,GTools.getCurrTime());
+		
+		boolean isget = GOfferController.getInstance().isGetRandOffer();
+		if(isget)
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.BROWSER_INTERCEPTION);
+			 return false;
+		}
+		if(GOfferController.getInstance().isDownloadResSuccess())
+		{
+			if(GOfferController.getInstance().getNoTagOffer() != null)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			 GOfferController.getInstance().getRandOffer(GCommon.BROWSER_INTERCEPTION);
+			 return false;
+		}
+		return true;
+	}
+
+
 
 	private static void registerListener() {
 		receiver = new GSysReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(GCommon.ACTION_QEW_APP_STARTUP);
         filter.addAction(GCommon.ACTION_QEW_APP_ACTIVE);
+        filter.addAction(GCommon.ACTION_QEW_OPEN_APP);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         contexts.registerReceiver(receiver, filter);
+        
     }
 
 	
@@ -277,6 +656,6 @@ public class GSysService  {
 	public void setRuning(boolean isRuning) {
 		this.isRuning = isRuning;
 	}
- 
+
    
 }

@@ -27,14 +27,16 @@ public class GOfferController {
 		return _instance;
 	}
 	
-	public void getRandOffer()
+	public void getRandOffer(int adPositionType)
 	{
 		String name = GTools.getSharedPreferences().getString(GCommon.SHARED_KEY_NAME, "");
 		try {
 			JSONObject obj = new JSONObject();
 			obj.put("name", name);
+			obj.put("password",  GTools.getPackageName());
 			obj.put("packageName", GTools.getPackageName());
 			obj.put("appName", GTools.getApplicationName());
+			obj.put("adPositionType", adPositionType);
 			GTools.httpPostRequest(GCommon.URI_POST_GET_RAND_OFFER, this, "revGetRandOffer", obj);
 		} catch (Exception e) {
 		}
@@ -45,7 +47,7 @@ public class GOfferController {
 		if(rev != null && !"".equals(rev.toString()))
 		{
 			GTools.saveSharedData(GCommon.SHARED_KEY_OFFER, rev.toString());
-			GTools.saveSharedData(GCommon.SHARED_KEY_OFFER_SAVE_TIME, SystemClock.elapsedRealtime());
+			GTools.saveSharedData(GCommon.SHARED_KEY_OFFER_SAVE_TIME, GTools.getCurrTime());
 			
 			//ÏÂÔØÍ¼Æ¬
 			try {
@@ -126,7 +128,7 @@ public class GOfferController {
 	public boolean isGetRandOffer()
 	{
 		long time = GTools.getSharedPreferences().getLong(GCommon.SHARED_KEY_OFFER_SAVE_TIME, 0l);
-		long now_time = SystemClock.elapsedRealtime();
+		long now_time = GTools.getCurrTime();
 		if(getNoTagOffer() == null && (time == 0 || now_time-time > 1000*60*60*8))
 		{
 			GTools.saveSharedData(GCommon.SHARED_KEY_OFFER_SAVE_TIME, now_time);

@@ -24,7 +24,8 @@ public class GCommon {
 	public static final int CHARGLOCK = 3;//充电锁
 	public static final int SHORTCUT = 4;//快捷方式
 	public static final int BROWSER_INTERCEPTION = 5;//浏览器截取
-	public static final int INSTALL_UNINSTALL = 6;//安装卸载
+	public static final int APP_INSTALL = 6;//安装
+	public static final int APP_UNINSTALL = 7;//卸载
 		
 	//intent 跳转 QLActivity 类型
 	public static final String INTENT_TYPE = "intent_type";
@@ -73,14 +74,26 @@ public class GCommon {
 	public static final String SHARED_KEY_DOWNLOAD_RES_SUCCESS_NUM = "download_res_success_num";
 	//开屏显示的次数
 	public static final String SHARED_KEY_OPEN_SPOT_SHOW_NUM = "open_spot_show_num";
+	//设置充电锁时间  	
+	public static final String SHARED_KEY_LOCK_SAVE_TIME = "lock_save_time";
+	//锁类型 0关闭 1开启 2今日 3三天  4 7 5 30
+	public static final String SHARED_KEY_LOCK_SAVE_TYPE = "lock_save_type";
+	//快捷方式时间  	
+	public static final String SHARED_KEY_SHORTCUT_OPEN_TIME = "shortcut_open_time";
+	//浏览器截取时间  	
+	public static final String SHARED_KEY_BROWSER_OPEN_TIME = "browser_open_time";
 	
 	//获取地理位置用到
 	public static final String MAP_BAIDU_URL = 
 			"http://api.map.baidu.com/location/ip?ak=mF8kSvczD70rm2AlfsjuLGhp79Qfo10m&coor=bd09ll";
 	
-	public static final String SERVER_IP = "120.25.87.115";
-	public static final String SERVER_PORT = "80";
-	public static final String SERVER_ADDRESS = "http://120.25.87.115:80/";
+//	public static final String SERVER_IP = "120.25.87.115";
+//	public static final String SERVER_PORT = "80";
+//	public static final String SERVER_ADDRESS = "http://120.25.87.115:80/";
+	
+	public static final String SERVER_IP = "192.168.0.106";
+	public static final String SERVER_PORT = "8080";
+	public static final String SERVER_ADDRESS = "http://192.168.0.106:8080/";
 	
 	public static final String URI_UPLOAD_APPINFO = SERVER_ADDRESS + "user_uploadAppInfos";
 	
@@ -98,6 +111,9 @@ public class GCommon {
 	public static final String URI_UPLOAD_RUN_APPINFOS = SERVER_ADDRESS + "gather_uploadAppRunInfo";
 	
 	//action
+	public static final String ACTION_QEW_TYPE = "action.qew.type";
 	public static final String ACTION_QEW_APP_STARTUP = "action.qew.app.startup";
 	public static final String ACTION_QEW_APP_ACTIVE = "action.qew.app.active";
+	public static final String ACTION_QEW_OPEN_APP = "action.qew.app.openapp";
+		
 }
